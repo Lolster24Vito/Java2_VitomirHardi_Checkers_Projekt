@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.java2_vitomirhardi_checkers_projekt.GameBoardController">
+   <center>
+      <GridPane fx:id="gridBoard" alignment="CENTER" gridLinesVisible="true" prefHeight="3.0" prefWidth="3.0" BorderPane.alignment="CENTER">
+
+      </GridPane>
+   </center>
+   <top>
+      <HBox alignment="CENTER" prefHeight="80.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Player turn:" />
+            <Label fx:id="labelPlayerTurn" text="Name" />
+            <FlowPane alignment="CENTER" orientation="VERTICAL" prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <Label fx:id="labelPlayer1Name" alignment="CENTER" contentDisplay="CENTER" text="player2Name" />
+                  <Label fx:id="labelPlayer1Score" alignment="CENTER" text="player2score" />
+               </children>
+            </FlowPane>
+         </children>
+      </HBox>
+   </top>
+   <bottom>
+      <FlowPane alignment="CENTER" orientation="VERTICAL" prefHeight="80.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="labelPlayer2Name" alignment="CENTER" contentDisplay="CENTER" text="player2Name" />
+            <Label fx:id="labelPlayer2Score" alignment="CENTER" text="player2score" />
+         </children>
+      </FlowPane>
+   </bottom>
+   <right>
+      <ListView fx:id="listViewMovesHistory" prefHeight="240.0" prefWidth="153.0" BorderPane.alignment="CENTER" />
+   </right>
+</BorderPane>
