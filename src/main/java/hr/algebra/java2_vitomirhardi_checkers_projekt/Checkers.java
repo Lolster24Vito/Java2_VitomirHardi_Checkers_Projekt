@@ -1,3 +1,4 @@
+package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
