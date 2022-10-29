@@ -18,8 +18,8 @@
          <children>
             <FlowPane alignment="CENTER" orientation="VERTICAL" prefHeight="200.0" prefWidth="200.0">
                <children>
-                  <Label fx:id="labelPlayer1Name" alignment="CENTER" contentDisplay="CENTER" text="player2Name" />
-                  <Label fx:id="labelPlayer1Score" alignment="CENTER" text="player2score" />
+                  <Label fx:id="labelPlayerWhiteName" alignment="CENTER" contentDisplay="CENTER" text="player2Name" />
+                  <Label fx:id="labelPlayerWhiteScore" alignment="CENTER" text="player2score" />
                </children>
             </FlowPane>
          </children>
@@ -28,8 +28,8 @@
    <bottom>
       <FlowPane alignment="CENTER" orientation="VERTICAL" prefHeight="80.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="labelPlayer2Name" alignment="CENTER" contentDisplay="CENTER" text="player2Name" />
-            <Label fx:id="labelPlayer2Score" alignment="CENTER" text="player2score" />
+            <Label fx:id="labelPlayerBlackName" alignment="CENTER" contentDisplay="CENTER" text="player2Name" />
+            <Label fx:id="labelPlayerBlackScore" alignment="CENTER" text="player2score" />
          </children>
       </FlowPane>
    </bottom>

@@ -1,8 +1,5 @@
 package hr.algebra.jave2_vitomirhardi_checkers_projekt.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PlayerMove {
 
     PieceData pieceToMove;
@@ -23,17 +20,24 @@ public class PlayerMove {
     }
 
     public PlayerMove(PieceData pieceToMove, Position position, Boolean isJump) {
-        this.pieceToMove = pieceToMove;
+        this.pieceToMove = new PieceData(pieceToMove.pos,pieceToMove.isKing,pieceToMove.getPieceColor());
         this.position = position;
         this.isMoveJump = isJump;
     }
 
     @Override
     public String toString() {
-        return "fromTile=" + pieceToMove.pos +
-                ", toTile=" + position;
+        StringBuilder sb=new StringBuilder();
+        if(this.isMoveJump)sb.append("Jump from");
+        else sb.append("Move from");
+        sb.append(pieceToMove.pos.toString());
+        sb.append(", to=");
+        sb.append(position.toString());
+        return sb.toString();
     }
-
+public Position getPiecePosition(){
+    return pieceToMove.getPos();
+}
 
 
 

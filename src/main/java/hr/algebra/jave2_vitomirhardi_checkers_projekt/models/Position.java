@@ -69,4 +69,9 @@ public class Position {
     public int hashCode() {
         return Objects.hash(xPos, yPos);
     }
+
+    @Override
+    public String toString() {
+        return (xPos+","+yPos);
+    }
 }

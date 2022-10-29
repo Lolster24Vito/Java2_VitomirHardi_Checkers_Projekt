@@ -18,6 +18,9 @@ public class PieceData {
     public Boolean getKing() {
         return isKing;
     }
+    public void setKing() {
+        isKing = true;
+    }
 
     public PieceData(Position pos, Boolean isKing, PlayerColor pieceColor) {
         this.pos = pos;
