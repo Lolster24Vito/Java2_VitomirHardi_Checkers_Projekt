@@ -1,7 +1,5 @@
 package hr.algebra.jave2_vitomirhardi_checkers_projekt.models;
 
-import hr.algebra.java2_vitomirhardi_checkers_projekt.Checkers;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +16,37 @@ public class Board {
     public final int Y_COLUMN_SIZE;
     public Tile[][] tiles;
 
-    private List<PieceData> eatenWhitePieces = new ArrayList<>();
-    private List<PieceData> eatenBlackPieces = new ArrayList<>();
+
+    private int eatenWhitePieces = 0;
+    private int eatenWhiteKings=0;
+    private int eatenBlackPieces =0;
+    private int eatenBlackKings =0;
+
+
+    public int getEatenWhitePieces() {
+        return eatenWhitePieces;
+    }
+    public int getEatenWhiteKings(){
+        return eatenWhiteKings;
+    }
+
+    public int getEatenBlackPieces() {
+        return eatenBlackPieces;
+    }
+    public int getEatenBlackKings() {
+        return eatenBlackKings;
+    }
+
+    public void setEatenWhitePieces(int eatenWhitePieces,int eatenWhiteKings) {
+        this.eatenWhitePieces = eatenWhitePieces;
+        this.eatenWhiteKings=eatenWhiteKings;
+    }
+
+    public void setEatenBlackPieces(int eatenBlackPieces,int eatenBlackKings) {
+        this.eatenBlackPieces = eatenBlackPieces;
+        this.eatenBlackKings=eatenBlackKings;
+    }
+
 
 
     public ArrayList<PlayerMove> getLegalJumpsFrom(PlayerColor playerTurn, PieceData piece) {
@@ -63,15 +90,15 @@ public class Board {
         //cannot kill another piece is in the way
 
         if (playerTurn == PlayerColor.black) {
-            if (piece.getPieceColor() == PlayerColor.black && p2.getY() > piece.pos.getY())
+            if (!piece.getIsKing()&&piece.getPieceColor() == PlayerColor.black && p2.getY() > piece.pos.getY())
                 return false;  // Regular red piece can only move up.
             if (!tile2.hasPiece()) return false;
             if (tile2.hasPiece() && tile2.getPieceColor() == PlayerColor.black)
                 return false;  // There is no black piece to jump.
             return true;  // The jump is legal.
         } else {
-            if (piece.getPieceColor() == PlayerColor.white && p2.getY() < p2.getY())
-                return false;  // Regular black piece can only move downn.
+            if (!piece.getIsKing()&&piece.getPieceColor() == PlayerColor.white && p2.getY() < piece.pos.getY())
+                return false;  // Regular black piece can only move down.
             if (!tile2.hasPiece()) return false;
             if (tile2.hasPiece() && tile2.getPieceColor() == PlayerColor.white)
                 return false;  // There is no red piece to jump.
@@ -81,7 +108,7 @@ public class Board {
     }
 
     // end canJump()
-    public boolean canMove(PlayerColor playerTurn, PieceData piece, Position pos2) {
+    private boolean canMove(PlayerColor playerTurn, PieceData piece, Position pos2) {
 
         if (pos2.getX() < 0 || pos2.getX() >= 8 || pos2.getY() < 0 || pos2.getY() >= 8)
             return false;  // (r2,c2) is off the board.
@@ -90,14 +117,24 @@ public class Board {
         if (tileAtPos.hasPiece() == true) return false;  // (r2,c2) already contains a piece.
 
         if (playerTurn.equals(PlayerColor.white)) {
-            if (piece.getPieceColor().equals(PlayerColor.white) && pos2.getY() < piece.pos.getY())
-                return false;  // Regular red piece can only move down.
-            return true;  // The move is legal.
-        } else {
-            if (piece.getPieceColor().equals(PlayerColor.black) && pos2.getY() > piece.pos.getY())
-                return false;  // Regular black piece can only move up.
-            return true;  // The move is legal.
+            if (piece.getPieceColor().equals(PlayerColor.white)) {
+                if (!piece.getIsKing() && (pos2.getY() < piece.pos.getY())) {
+                    return false;
+                }
+                if (piece.getIsKing()) return true;
+                //if piece not king white can only move down
+
+                return true;  // The move is legal.
+            }
+        }else {
+            if (piece.getPieceColor().equals(PlayerColor.black)) {
+                if (((!piece.getIsKing() && pos2.getY() > piece.pos.getY())))
+                    return false;  // Regular black piece can only move up.
+                if (piece.getIsKing()) return true;
+                return true;  // The move is legal.
+            }
         }
+        return false;
 
     }
 
@@ -119,28 +156,21 @@ public class Board {
     }
 
     public int getWhiteScore() {
-        int score = 0;
-        int normalPieces = (int) eatenWhitePieces.stream().filter(p -> !p.isKing).count();
-        score += normalPieces;
-        int kingPieces = (int) eatenWhitePieces.stream().filter(p -> p.isKing).count();
-        score += (kingPieces * 2);
-        return score;
+        return eatenWhitePieces+(eatenWhiteKings*2);
     }
 
     public int getBlackScore() {
-        int score = 0;
-        int normalPieces = (int) eatenBlackPieces.stream().filter(p -> !p.isKing).count();
-        score += normalPieces;
-        int kingPieces = (int) eatenBlackPieces.stream().filter(p -> p.isKing).count();
-        score += (kingPieces * 2);
-        return score;
+
+        return eatenBlackPieces+(eatenBlackKings*2);
     }
 
     public void addJump(PieceData piece) {
         if (piece.getPieceColor().equals(PlayerColor.black)) {
-            eatenBlackPieces.add(piece);
+            if(piece.getIsKing())eatenBlackKings++;
+            else eatenBlackPieces++;
         } else {
-            eatenWhitePieces.add(piece);
+            if(piece.getIsKing())eatenWhiteKings++;
+            else eatenWhitePieces++;
         }
     }
 

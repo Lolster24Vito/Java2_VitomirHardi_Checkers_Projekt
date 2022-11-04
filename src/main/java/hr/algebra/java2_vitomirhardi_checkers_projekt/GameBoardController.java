@@ -1,22 +1,28 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
+import hr.algebra.Utils.TimerUtils;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
 import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.*;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class GameBoardController implements Initializable {
     @FXML
@@ -29,9 +35,14 @@ public class GameBoardController implements Initializable {
     @FXML
     private Label labelPlayerWhiteScore;
     @FXML
+    private Label labelPlayerWhiteTime;
+    @FXML
     private Label labelPlayerBlackName;
     @FXML
     private Label labelPlayerBlackScore;
+    @FXML
+    private Label labelPlayerBlackTime;
+
     @FXML
     private Label labelPlayerTurn;
 
@@ -74,6 +85,46 @@ public class GameBoardController implements Initializable {
     //sets up pieces board,and gridPanel
     private final  int X_COLUMN_SIZE =8;
     private final  int Y_ROW_SIZE =8;
+private     Timer whiteTimer = new Timer();
+    private     Timer blackTimer = new Timer();
+    private long whiteTimerSeconds=0;
+    private long blackTimerSeconds=0;
+
+TimerTask whiteTimerTask=new TimerTask() {
+    @Override
+    public void run() {
+        if(colorTurn.equals(PlayerColor.white)){
+
+
+        whiteTimerSeconds++;
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
+
+
+            }
+        });
+        }
+    }
+};
+    TimerTask blackTimerTask = new TimerTask() {
+        @Override
+        public void run() {
+            if (colorTurn.equals(PlayerColor.black)) {
+
+                blackTimerSeconds++;
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds));
+
+
+                    }
+                });
+            }
+        }
+    };
 
     public void InitPane() {
 
@@ -99,6 +150,7 @@ public class GameBoardController implements Initializable {
                 gridBoard.add(tile, j, i);
                 //circle
                 if ((i <= 2) && count % 2 == 1) {
+
                     Piece piece = new Piece(PIECE_SIZE, WHITE_PIECE_COLOR, new Position(j, i), PlayerColor.white);
                     piece.setOnMouseClicked(eventPieceClicked(piece));
                     tile.setPiece(piece);
@@ -106,12 +158,15 @@ public class GameBoardController implements Initializable {
                 }
                 if ((i >= 5) && count % 2 == 1) {
                     //PIECE_SIZE,Color.RED,i,j, PlayerColor.white);
+
                     Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
                     piece.setOnMouseClicked(eventPieceClicked(piece));
                     tile.setPiece(piece);
                     gridBoard.add(piece, j, i);
+
                 }
                 board.tiles[j][i] = tile;
+
                 count++;
             }
             count++;
@@ -145,12 +200,32 @@ public class GameBoardController implements Initializable {
                             && selectedPiece.getPiece().getPieceColor().equals(colorTurn)
                             && checkIfValidMove(tile.getTileData())
                     ){
+
+                       Position tilePos=tile.getPosition();
                         movePiece(selectedPiece
-                                , board.tiles[tile.getPosition().getX()][tile.getPosition().getY()]);
+                                , board.tiles[tilePos.getX()][tilePos.getY()]);
+                        Optional<PlayerMove> doneMove=selectedAvailablePositions.stream().filter(m->m.getPosition().equals(tilePos)).findFirst();
 
-                        //if there's more legal moves change
 
+                        //if there's more legal jumps for player dont change
+                        Boolean anotherJump=false;
+                        if(doneMove.get().isJump()) {
+                            if (board.tiles[tilePos.getX()][tilePos.getY()].hasPiece()) {
+                                ArrayList<PlayerMove> legalJumpsFromNewPos = board.getLegalJumpsFrom(colorTurn, board.tiles[tilePos.getX()][tilePos.getY()]
+                                        .getTileData().getPiece());
+                                if (legalJumpsFromNewPos.size() > 0) {
+                                    clearJumpHighlights();
+                                    clearSelectedPieceColor();
+                                    allPlayerAvailablePositions = legalJumpsFromNewPos;
+                                    anotherJump = true;
+                                }
+
+                            }
+                        }
+                        if(!anotherJump)
                         changePlayerTurn();
+
+
                     }
                 }
             }
@@ -165,13 +240,81 @@ public class GameBoardController implements Initializable {
 
         if (colorTurn.equals(PlayerColor.white)) {
             labelPlayerTurn.setText(GameStartController.getWhitePlayer().getPlayerName());
+
         }
         if (colorTurn.equals(PlayerColor.black)) {
             labelPlayerTurn.setText(GameStartController.getBlackPlayer().getPlayerName());
         }
         allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
+
+        //todo remove this debug code
+
+
+
+        if(allPlayerAvailablePositions.isEmpty()){
+            //todo
+            try {
+                playerWin();
+            }
+            catch (Exception e){}
+        }
         isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
         highlightJumps();
+
+    }
+
+    private void playerWin() throws IOException {
+
+        LeaderboardResult leaderboardResult;
+        if(colorTurn==PlayerColor.black){
+            leaderboardResult=new LeaderboardResult(GameStartController.getWhitePlayer().getPlayerName(),whiteTimerSeconds, board.getWhiteScore(),PlayerColor.white);
+
+        }
+        else{
+            //black is winner
+            leaderboardResult=new LeaderboardResult(GameStartController.getBlackPlayer().getPlayerName(),blackTimerSeconds, board.getBlackScore(),PlayerColor.black);
+
+        }
+
+
+
+
+        try {
+            RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("GameWinScreen.fxml"));
+        Scene scene = null;
+            scene = new Scene(fxmlLoader.load(), 1200, 768);
+GameWinController gameWinController=fxmlLoader.getController();
+gameWinController.setWinner(leaderboardResult);
+gameWinController.setMoves(turnManager.getMoves());
+        /*
+
+
+
+         */
+        Stage stage=new Stage();
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(HelloApplication.getMainStage());
+
+        HelloApplication.setPopupStage(stage);
+
+        HelloApplication.getPopupStage().setTitle("GameWinScreen.fxml");
+        HelloApplication.getPopupStage().setScene(scene);
+        HelloApplication.getPopupStage().showAndWait();
+//showandwait()
+       // GameWinController gameWinController=loader.gerController();
+/*
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setContentText(colorTurn==PlayerColor.black?
+                String.format("white player %s is winner",GameStartController.getWhitePlayer().getPlayerName())
+                :String.format("black player %s is winner",GameStartController.getBlackPlayer().getPlayerName())
+        );
+a.show();*/
+
+
     }
 
     private void clearJumpHighlights() {
@@ -258,7 +401,9 @@ public class GameBoardController implements Initializable {
         allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
         isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
         refreshScore();
-//movePiece(board.tiles[5][2],board.tiles[3][4]);
+        whiteTimer.scheduleAtFixedRate(whiteTimerTask, 0, 1000);
+        blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
+
 
     }
 
@@ -347,6 +492,89 @@ public class GameBoardController implements Initializable {
         //add
         gridBoard.add(movedPiece, moveToPos.getX(), moveToPos.getY());
         board.tiles[moveToPos.getX()][moveToPos.getY()].setPiece(movedPiece);
+    }
+    public void saveGame() throws IOException {
+
+        //todo add saveTo window
+        List<PieceData> pieces=new ArrayList<>();
+
+        for(int i = 0; i < X_COLUMN_SIZE; i++) {
+            for(int j = 0; j < Y_ROW_SIZE; j++) {
+                if(board.tiles[j][i].hasPiece()){
+                    pieces.add(board.tiles[j][i].getTileData().getPiece());
+                }
+
+            }
+        }
+        SerializableBoard serializableBoard=new SerializableBoard(
+                pieces,colorTurn,
+                GameStartController.getWhitePlayer().getPlayerName(),
+                GameStartController.getBlackPlayer().getPlayerName(),
+                whiteTimerSeconds,blackTimerSeconds
+        , board.getEatenWhitePieces(),board.getEatenWhiteKings(), board.getEatenBlackPieces(),board.getEatenBlackKings());
+
+        try (ObjectOutputStream serializator = new ObjectOutputStream(
+                new FileOutputStream("savedGame.ser"))) {
+            serializator.writeObject(serializableBoard);
+        }
+    }
+    public void loadGame() throws IOException, ClassNotFoundException {
+        //todo add load window
+        try (ObjectInputStream deserializator = new ObjectInputStream((
+                new FileInputStream("savedGame.ser")
+        ))) {
+            SerializableBoard serializableBoard = (SerializableBoard) deserializator.readObject();
+
+
+//remove everything from board
+            //init again
+            //clear board
+            //load pieces
+            clearBoard();
+
+            for (PieceData pieceD : serializableBoard.getSerializablePieces()) {
+                loadPieceToTile(pieceD);
+            }
+            whiteTimerSeconds= serializableBoard.getWhiteTimerSeconds();
+            blackTimerSeconds= serializableBoard.getBlackTimerSeconds();
+            labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
+            labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds));
+
+
+            GameStartController.setWhitePlayerName(serializableBoard.getWhitePlayerName());
+            GameStartController.setBlackPlayerName(serializableBoard.getBlackPlayerName());
+            colorTurn=serializableBoard.getPlayerTurn();
+            board.setEatenWhitePieces(serializableBoard.getEatenWhitePieces(), serializableBoard.getEatenWhiteKings());
+            board.setEatenBlackPieces(serializableBoard.getEatenBlackPieces(), serializableBoard.getEatenBlackKings());
+
+            allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
+            if(allPlayerAvailablePositions.isEmpty()){
+                playerWin();
+            }
+            isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
+            highlightJumps();
+            refreshScore();
+
+        }
+
+    }
+
+    private void loadPieceToTile(PieceData pieceD) {
+        Color pieceColor = pieceD.getPieceColor() == PlayerColor.white ? WHITE_PIECE_COLOR : BLACK_PIECE_COLOR;
+        Piece piece = new Piece(PIECE_SIZE, pieceColor, pieceD);
+        piece.setOnMouseClicked(eventPieceClicked(piece));
+        Position piecePos = pieceD.getPos();
+
+        board.tiles[piecePos.getX()][piecePos.getY()].setPiece(piece);
+        gridBoard.add(piece, piecePos.getX(), piecePos.getY());
+    }
+
+    private void clearBoard() {
+        for( int i=0;i<X_COLUMN_SIZE;i++){
+            for (int j=0;j<Y_ROW_SIZE;j++){
+            removePieceFromTile(i,j);
+            }
+        }
     }
 
 

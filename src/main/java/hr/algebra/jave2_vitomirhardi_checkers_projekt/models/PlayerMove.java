@@ -20,7 +20,7 @@ public class PlayerMove {
     }
 
     public PlayerMove(PieceData pieceToMove, Position position, Boolean isJump) {
-        this.pieceToMove = new PieceData(pieceToMove.pos,pieceToMove.isKing,pieceToMove.getPieceColor());
+        this.pieceToMove = new PieceData(pieceToMove.pos,pieceToMove.getIsKing(),pieceToMove.getPieceColor());
         this.position = position;
         this.isMoveJump = isJump;
     }
@@ -28,10 +28,11 @@ public class PlayerMove {
     @Override
     public String toString() {
         StringBuilder sb=new StringBuilder();
-        if(this.isMoveJump)sb.append("Jump from");
-        else sb.append("Move from");
+        sb.append(pieceToMove.pieceColor==PlayerColor.black?"Black ":"White ");
+        if(this.isMoveJump)sb.append("jump from");
+        else sb.append("move from:");
         sb.append(pieceToMove.pos.toString());
-        sb.append(", to=");
+        sb.append(", to:");
         sb.append(position.toString());
         return sb.toString();
     }

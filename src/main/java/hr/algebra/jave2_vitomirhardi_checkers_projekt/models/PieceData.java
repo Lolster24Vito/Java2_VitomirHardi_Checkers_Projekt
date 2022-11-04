@@ -1,8 +1,10 @@
 package hr.algebra.jave2_vitomirhardi_checkers_projekt.models;
 
-public class PieceData {
+import java.io.Serializable;
+
+public class PieceData implements Serializable {
     Position pos;
-    Boolean isKing=false;
+    private Boolean isKing=false;
     PlayerColor pieceColor;
     Boolean isAlive=true;
 
@@ -15,7 +17,7 @@ public class PieceData {
     public PlayerColor getPieceColor() {
         return pieceColor;
     }
-    public Boolean getKing() {
+    public Boolean getIsKing() {
         return isKing;
     }
     public void setKing() {

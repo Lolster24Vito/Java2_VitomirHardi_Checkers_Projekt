@@ -1,8 +1,9 @@
 package hr.algebra.jave2_vitomirhardi_checkers_projekt.models;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Position {
+public class Position implements Serializable {
     private int xPos;
     private int yPos;
 

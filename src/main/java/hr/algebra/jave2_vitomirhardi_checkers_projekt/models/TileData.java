@@ -1,6 +1,8 @@
 package hr.algebra.jave2_vitomirhardi_checkers_projekt.models;
 
-public class TileData {
+import java.io.Serializable;
+
+public class TileData implements Serializable {
     public TileData(Position position) {
         this.position = position;
     }

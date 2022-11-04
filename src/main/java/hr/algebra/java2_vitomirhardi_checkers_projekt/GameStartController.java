@@ -35,6 +35,14 @@ public class GameStartController {
         return whitePlayer;
     }
 
+    public void showLeaderBoard() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("Gameleaderboard.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
+        HelloApplication.getMainStage().setTitle("Checkers Leaderboard");
+        HelloApplication.getMainStage().setScene(scene);
+        HelloApplication.getMainStage().show();
+
+    }
     public void StartGame() throws IOException {
         String playerOneName = tfPlayer1.getText();
         String playerTwoName = tfPlayer2.getText();
@@ -55,6 +63,12 @@ public class GameStartController {
         HelloApplication.getMainStage().setTitle("Checkers");
         HelloApplication.getMainStage().setScene(scene);
         HelloApplication.getMainStage().show();
+    }
+    public static void setWhitePlayerName(String newName){
+        whitePlayer=new PlayerInfo(newName,PlayerColor.white);
+    }
+    public static void setBlackPlayerName(String newName){
+        blackPlayer=new PlayerInfo(newName,PlayerColor.white);
     }
 
 }

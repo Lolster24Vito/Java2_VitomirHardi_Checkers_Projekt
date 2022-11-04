@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.java2_vitomirhardi_checkers_projekt.GameWinController">
+   <children>
+      <VBox alignment="CENTER" layoutX="236.0" layoutY="1.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <HBox alignment="CENTER">
+               <children>
+                  <Label text=" Player winner:">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="labelWinnerName" text="PlayerName">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <HBox alignment="CENTER">
+               <children>
+                  <Label text="in: ">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <Label fx:id="labelWinnerTime" text="000">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Label>
+            <Label text="with a score of:">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Label>
+            <Label fx:id="labelScore" text="2">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Label>
+            <HBox alignment="CENTER" prefHeight="132.0" prefWidth="600.0" spacing="60.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#playAgain" text="Play again">
+                     <font>
+                        <Font size="15.0" />
+                     </font></Button>
+                  <Button mnemonicParsing="false" onAction="#ViewMatchMoves" text="View match moves">
+                     <font>
+                        <Font size="15.0" />
+                     </font></Button>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
