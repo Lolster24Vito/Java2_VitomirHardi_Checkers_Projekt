@@ -54,7 +54,7 @@
       </FlowPane>
    </bottom>
    <right>
-      <ListView fx:id="listViewMovesHistory" prefHeight="240.0" prefWidth="153.0" BorderPane.alignment="CENTER" />
+      <ListView fx:id="listViewMovesHistory" prefHeight="362.0" prefWidth="192.0" BorderPane.alignment="CENTER" />
    </right>
    <left>
       <FlowPane alignment="CENTER" prefHeight="240.0" prefWidth="85.0" BorderPane.alignment="CENTER">

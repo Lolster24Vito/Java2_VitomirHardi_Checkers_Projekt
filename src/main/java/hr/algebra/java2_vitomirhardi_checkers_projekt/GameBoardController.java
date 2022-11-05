@@ -101,11 +101,10 @@ TimerTask whiteTimerTask=new TimerTask() {
             @Override
             public void run() {
                 labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
-
-
             }
         });
         }
+
     }
 };
     TimerTask blackTimerTask = new TimerTask() {
@@ -127,6 +126,22 @@ TimerTask whiteTimerTask=new TimerTask() {
     };
 
     public void InitPane() {
+
+        LeaderboardResult leaderboardResult1=new LeaderboardResult("Obican brod",215, 6,PlayerColor.black);
+        LeaderboardResult leaderboardResult2=new LeaderboardResult("Svemirski avion",466, 6,PlayerColor.white);
+        LeaderboardResult leaderboardResult3=new LeaderboardResult("Vito",1223, 6,PlayerColor.white);
+
+
+        try {
+            RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult1);
+            RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult2);
+            RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult3);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
         board = new Board(X_COLUMN_SIZE, Y_ROW_SIZE);
         // Create 64 rectangles and add to pane
@@ -247,7 +262,6 @@ TimerTask whiteTimerTask=new TimerTask() {
         }
         allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
 
-        //todo remove this debug code
 
 
 
@@ -260,6 +274,7 @@ TimerTask whiteTimerTask=new TimerTask() {
         }
         isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
         highlightJumps();
+
 
     }
 
@@ -278,6 +293,8 @@ TimerTask whiteTimerTask=new TimerTask() {
 
 
 
+        whiteTimerTask.cancel();
+        blackTimerTask.cancel();
 
         try {
             RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult);
@@ -392,11 +409,7 @@ a.show();*/
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        String whitePlayerName = GameStartController.getWhitePlayer().getPlayerName();
-        labelPlayerWhiteName.setText(whitePlayerName);
-        labelPlayerBlackName.setText(GameStartController.getBlackPlayer().getPlayerName());
-        labelPlayerTurn.setText(whitePlayerName);
-        labelStatus.setText("");
+        initLabels();
         InitPane();
         allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
         isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
@@ -405,8 +418,16 @@ a.show();*/
         blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
 
 
+
     }
 
+    private void initLabels() {
+        String whitePlayerName = GameStartController.getWhitePlayer().getPlayerName();
+        labelPlayerWhiteName.setText(whitePlayerName);
+        labelPlayerBlackName.setText(GameStartController.getBlackPlayer().getPlayerName());
+        labelPlayerTurn.setText(whitePlayerName);
+        labelStatus.setText("");
+    }
 
 
     private void movePiece(Tile selectedTile, Tile moveToTile) {
@@ -578,4 +599,8 @@ a.show();*/
     }
 
 
+    public void dispose() {
+        blackTimerTask.cancel();
+        whiteTimerTask.cancel();
+    }
 }

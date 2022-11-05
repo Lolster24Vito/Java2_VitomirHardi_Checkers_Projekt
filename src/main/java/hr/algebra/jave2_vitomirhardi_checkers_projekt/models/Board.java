@@ -166,11 +166,11 @@ public class Board {
 
     public void addJump(PieceData piece) {
         if (piece.getPieceColor().equals(PlayerColor.black)) {
-            if(piece.getIsKing())eatenBlackKings++;
-            else eatenBlackPieces++;
-        } else {
             if(piece.getIsKing())eatenWhiteKings++;
             else eatenWhitePieces++;
+        } else {
+            if(piece.getIsKing())eatenBlackKings++;
+            else eatenBlackPieces++;
         }
     }
 

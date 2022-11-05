@@ -70,7 +70,7 @@ gameMovesController.setWinScreenLeaderboardResult(winner);
     public  void setWinner(LeaderboardResult winner) {
         this.winner = winner;
         labelWinnerName.setText(winner.getWinnerName());
-        labelWinnerTime.setText(String.valueOf(winner.getPlayerMatchTime()));
+        labelWinnerTime.setText(TimerUtils.secondsToFormat(winner.getPlayerMatchTime()));
         labelScore.setText(String.valueOf(winner.getScore()));
     }
 

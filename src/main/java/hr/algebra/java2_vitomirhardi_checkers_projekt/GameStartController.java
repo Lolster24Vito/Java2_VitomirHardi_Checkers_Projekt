@@ -2,6 +2,7 @@ package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
 import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerColor;
 import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerInfo;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -34,6 +35,7 @@ public class GameStartController {
     public static PlayerInfo getWhitePlayer() {
         return whitePlayer;
     }
+    private GameBoardController boardController;
 
     public void showLeaderBoard() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("Gameleaderboard.fxml"));
@@ -49,20 +51,21 @@ public class GameStartController {
 
          blackPlayer =new PlayerInfo(rbBlack.isSelected()?playerOneName:playerTwoName,PlayerColor.black);
         whitePlayer =new PlayerInfo(rbBlack.isSelected()?playerTwoName:playerOneName,PlayerColor.white);
-      
-       /* player1Info = new PlayerInfo(playerOneName,
-                rbBlack.isSelected() ? PlayerColor.black : PlayerColor.white);*/
 
-       /* player2Info = new PlayerInfo(playerTwoName,
-                rbWhite.isSelected() ? PlayerColor.white : PlayerColor.black);*/
 
 
 
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("CheckersBoard.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
+        boardController=fxmlLoader.getController();
         HelloApplication.getMainStage().setTitle("Checkers");
         HelloApplication.getMainStage().setScene(scene);
         HelloApplication.getMainStage().show();
+        HelloApplication.getMainStage().setOnCloseRequest(event->{
+            boardController.dispose();
+            Platform.exit();
+            System.exit(0);
+        });
     }
     public static void setWhitePlayerName(String newName){
         whitePlayer=new PlayerInfo(newName,PlayerColor.white);

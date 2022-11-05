@@ -35,10 +35,7 @@ private TableColumn<LeaderboardResult,String> nameColumn;
 TableColumn<LeaderboardResult,Integer> columnTime;
 @FXML TableColumn<LeaderboardResult,Integer> columnScore;
 
-    ObservableList<LeaderboardResult> mockList= FXCollections.observableArrayList(
-            new LeaderboardResult("vito",1200,5, PlayerColor.white),
-            new LeaderboardResult("Daniel",9999,22,PlayerColor.black)
-    );
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -47,8 +44,8 @@ TableColumn<LeaderboardResult,Integer> columnTime;
     TableColumn nameColumn=new TableColumn<LeaderboardResult,String>("winner name");
         nameColumn.setCellValueFactory(new PropertyValueFactory<LeaderboardResult,String>("winnerName"));
 
-        TableColumn columnTime = new TableColumn<LeaderboardResult,Integer>("player match time");
-        columnTime.setCellValueFactory(new PropertyValueFactory<LeaderboardResult,Long>("playerMatchTime"));
+        TableColumn columnTime = new TableColumn<LeaderboardResult,String>("player match time");
+        columnTime.setCellValueFactory(new PropertyValueFactory<LeaderboardResult,String>("playerMatchTimeFormatted"));
         TableColumn columnScore = new TableColumn<LeaderboardResult,Integer>("Score");
         columnScore.setCellValueFactory(new PropertyValueFactory<LeaderboardResult,Integer>("score"));
 
@@ -82,7 +79,7 @@ TableColumn<LeaderboardResult,Integer> columnTime;
     public void loadData(){
         try {
             List<LeaderboardResult> leaderboardResults = RepositoryFactory.getLeaderboardRepository().getLeaderboardResults();
-            tableLeaderboard.setItems(FXCollections.observableArrayList(RepositoryFactory.getLeaderboardRepository().getLeaderboardResults()));
+            tableLeaderboard.setItems(FXCollections.observableArrayList(leaderboardResults));
 
         } catch (IOException e) {
             throw new RuntimeException(e);

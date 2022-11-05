@@ -29,7 +29,7 @@ public class PlayerMove {
     public String toString() {
         StringBuilder sb=new StringBuilder();
         sb.append(pieceToMove.pieceColor==PlayerColor.black?"Black ":"White ");
-        if(this.isMoveJump)sb.append("jump from");
+        if(this.isMoveJump)sb.append("jump from:");
         else sb.append("move from:");
         sb.append(pieceToMove.pos.toString());
         sb.append(", to:");
