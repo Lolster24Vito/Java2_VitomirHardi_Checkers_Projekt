@@ -35,6 +35,12 @@ public class GameStartController {
     public static PlayerInfo getWhitePlayer() {
         return whitePlayer;
     }
+    public static void setWhitePlayerName(String newName){
+        whitePlayer=new PlayerInfo(newName,PlayerColor.white);
+    }
+    public static void setBlackPlayerName(String newName){
+        blackPlayer=new PlayerInfo(newName,PlayerColor.white);
+    }
     private GameBoardController boardController;
 
     public void showLeaderBoard() throws IOException {
@@ -67,11 +73,6 @@ public class GameStartController {
             System.exit(0);
         });
     }
-    public static void setWhitePlayerName(String newName){
-        whitePlayer=new PlayerInfo(newName,PlayerColor.white);
-    }
-    public static void setBlackPlayerName(String newName){
-        blackPlayer=new PlayerInfo(newName,PlayerColor.white);
-    }
+
 
 }

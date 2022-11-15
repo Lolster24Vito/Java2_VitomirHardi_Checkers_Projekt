@@ -35,7 +35,6 @@ System.out.println("bla");
     }
 
     public void goToGameStartScreen(){
-//maintein leadearboardresult
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("GameWinScreen.fxml"));
         Scene scene = null;
         try {

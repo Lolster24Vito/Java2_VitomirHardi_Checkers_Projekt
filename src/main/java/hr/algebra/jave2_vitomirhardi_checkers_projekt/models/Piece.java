@@ -6,9 +6,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.StrokeType;
 
 public class Piece extends Circle {
-    //todo refactor
-    //PieceInfo
-    //Piece info ima sve ove podatke
+
     PieceData pieceData;
 
     public void setPosition(Position pos) {
@@ -56,6 +54,9 @@ public class Piece extends Circle {
     public Piece(double v, Paint paint, PieceData pieceData) {
         super(v, paint);
         this.pieceData = pieceData;
+        if(this.pieceData.getIsKing()){
+            turnPieceIntoKing();
+        }
     }
 
     private void turnPieceIntoKing() {

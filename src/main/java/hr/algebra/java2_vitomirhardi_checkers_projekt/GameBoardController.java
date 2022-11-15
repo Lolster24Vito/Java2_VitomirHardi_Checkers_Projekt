@@ -1,5 +1,7 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
+import hr.algebra.Utils.HtmlStringUtils;
+import hr.algebra.Utils.ReflectionUtils;
 import hr.algebra.Utils.TimerUtils;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
 import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.*;
@@ -17,12 +19,19 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GameBoardController implements Initializable {
     @FXML
@@ -117,31 +126,27 @@ TimerTask whiteTimerTask=new TimerTask() {
                     @Override
                     public void run() {
                         labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds));
-
-
                     }
                 });
             }
         }
     };
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        initLabels();
+        InitPane();
+        allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
+        isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
+        refreshScore();
+        whiteTimer.scheduleAtFixedRate(whiteTimerTask, 0, 1000);
+        blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
 
+
+
+    }
     public void InitPane() {
 
-        LeaderboardResult leaderboardResult1=new LeaderboardResult("Obican brod",215, 6,PlayerColor.black);
-        LeaderboardResult leaderboardResult2=new LeaderboardResult("Svemirski avion",466, 6,PlayerColor.white);
-        LeaderboardResult leaderboardResult3=new LeaderboardResult("Vito",1223, 6,PlayerColor.white);
 
-
-        try {
-            RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult1);
-            RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult2);
-            RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult3);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
 
         board = new Board(X_COLUMN_SIZE, Y_ROW_SIZE);
         // Create 64 rectangles and add to pane
@@ -149,8 +154,6 @@ TimerTask whiteTimerTask=new TimerTask() {
         for (int i = 0; i < X_COLUMN_SIZE; i++) {
             for (int j = 0; j < Y_ROW_SIZE; j++) {
                 //rectangle
-//TODO check this
-// Tile tile = new Tile(SIDE_SIZE, SIDE_SIZE, SIDE_SIZE, SIDE_SIZE, new Position(i, j), count);
                 Tile tile = new Tile(SIDE_SIZE, SIDE_SIZE, SIDE_SIZE, SIDE_SIZE, new Position(j, i), count);
 
 
@@ -172,8 +175,6 @@ TimerTask whiteTimerTask=new TimerTask() {
                     gridBoard.add(piece, j, i);
                 }
                 if ((i >= 5) && count % 2 == 1) {
-                    //PIECE_SIZE,Color.RED,i,j, PlayerColor.white);
-
                     Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
                     piece.setOnMouseClicked(eventPieceClicked(piece));
                     tile.setPiece(piece);
@@ -266,7 +267,6 @@ TimerTask whiteTimerTask=new TimerTask() {
 
 
         if(allPlayerAvailablePositions.isEmpty()){
-            //todo
             try {
                 playerWin();
             }
@@ -274,7 +274,6 @@ TimerTask whiteTimerTask=new TimerTask() {
         }
         isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
         highlightJumps();
-
 
     }
 
@@ -407,19 +406,7 @@ a.show();*/
             }
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        initLabels();
-        InitPane();
-        allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
-        isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
-        refreshScore();
-        whiteTimer.scheduleAtFixedRate(whiteTimerTask, 0, 1000);
-        blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
 
-
-
-    }
 
     private void initLabels() {
         String whitePlayerName = GameStartController.getWhitePlayer().getPlayerName();
@@ -450,7 +437,8 @@ a.show();*/
             refreshScore();
         }
 
-        turnManager.AddMove(move.get());
+        PlayerMove turnMove=new PlayerMove(move.get().getPieceToMove(),move.get().getPosition(),move.get().getMoveJump());
+        turnManager.AddMove( turnMove);
         listViewMovesHistory.getItems().add(move.get().toString());
 
 
@@ -516,6 +504,13 @@ a.show();*/
     }
     public void saveGame() throws IOException {
 
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose where to save your game");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Save files","*.ser"));
+        File selectedDirectory = fileChooser.showSaveDialog(HelloApplication.getMainStage());
+
+      String name=selectedDirectory.getAbsolutePath();
+
         //todo add saveTo window
         List<PieceData> pieces=new ArrayList<>();
 
@@ -535,27 +530,44 @@ a.show();*/
         , board.getEatenWhitePieces(),board.getEatenWhiteKings(), board.getEatenBlackPieces(),board.getEatenBlackKings());
 
         try (ObjectOutputStream serializator = new ObjectOutputStream(
-                new FileOutputStream("savedGame.ser"))) {
+                new FileOutputStream(name))) {
             serializator.writeObject(serializableBoard);
         }
+        catch (Exception e){
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setContentText("File has not been saved due to an error");
+            a.show();
+
+        }
+
     }
     public void loadGame() throws IOException, ClassNotFoundException {
         //todo add load window
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose your save file");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Save files","*.ser"));
+        File selectedDirectory = fileChooser.showOpenDialog(HelloApplication.getMainStage());
+        if(selectedDirectory==null) return;
+        String name=selectedDirectory.getAbsolutePath();
+        if(!selectedDirectory.exists()){
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setContentText("No load files have been selected");
+            a.show();
+            return;
+        }
         try (ObjectInputStream deserializator = new ObjectInputStream((
-                new FileInputStream("savedGame.ser")
+                new FileInputStream(name)
         ))) {
             SerializableBoard serializableBoard = (SerializableBoard) deserializator.readObject();
 
 
 //remove everything from board
-            //init again
-            //clear board
-            //load pieces
             clearBoard();
-
+            //load pieces
             for (PieceData pieceD : serializableBoard.getSerializablePieces()) {
                 loadPieceToTile(pieceD);
             }
+            //load match data
             whiteTimerSeconds= serializableBoard.getWhiteTimerSeconds();
             blackTimerSeconds= serializableBoard.getBlackTimerSeconds();
             labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
@@ -564,6 +576,8 @@ a.show();*/
 
             GameStartController.setWhitePlayerName(serializableBoard.getWhitePlayerName());
             GameStartController.setBlackPlayerName(serializableBoard.getBlackPlayerName());
+            labelPlayerBlackName.setText(serializableBoard.getBlackPlayerName());
+            labelPlayerWhiteName.setText(serializableBoard.getWhitePlayerName());
             colorTurn=serializableBoard.getPlayerTurn();
             board.setEatenWhitePieces(serializableBoard.getEatenWhitePieces(), serializableBoard.getEatenWhiteKings());
             board.setEatenBlackPieces(serializableBoard.getEatenBlackPieces(), serializableBoard.getEatenBlackKings());
@@ -576,6 +590,11 @@ a.show();*/
             highlightJumps();
             refreshScore();
 
+        }
+        catch (Exception e){
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setContentText("File has not been loaded due to an error");
+            a.show();
         }
 
     }
@@ -602,5 +621,115 @@ a.show();*/
     public void dispose() {
         blackTimerTask.cancel();
         whiteTimerTask.cancel();
+    }
+
+
+    public void generateDocumentation(){
+        StringBuilder builder = new StringBuilder();
+        builder.append("<!DOCTYPE html>");
+        builder.append("<html>");
+        builder.append("<head>");
+        builder.append("<title>Naša dokumentacija</title>");
+        builder.append("<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC\" crossorigin=\"anonymous\">\n");
+        builder.append("</head>");
+        builder.append("<body> <div class=\"container\">");
+        builder.append("<h1>HTML dokumentacija projektnog zadatka</h1>");
+        builder.append("<h1>Popis klasa:</h1></br>");
+
+try{
+    List<Path> pathsList = Files.walk(Paths.get("."))
+            .filter(path -> path.getFileName().toString().endsWith(".class"))
+            .collect(Collectors.toList());
+    for (Path path:pathsList){
+        String fileName = path.getFileName().toString();
+
+        String fullQualifiedName = getFullQualifiedName(path);
+
+
+        if("module-info".equals(fullQualifiedName)) {
+            continue;
+        }
+
+//Klas name
+        Class<?> clazz = Class.forName(fullQualifiedName);
+        if(!clazz.isAnonymousClass()){
+            ReflectionUtils.readClassInfo(clazz,builder);
+        }
+
+        //ul li
+        //methods
+        //fields
+
+       /* Class<?> klasa;
+        try {
+            klasa = Class.forName(fullQualifiedName);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        ReflectionUtils.readClassInfo(klasa,builder);*/
+        //debug todo remove break
+    }
+
+} catch (IOException e) {
+    throw new RuntimeException(e);
+} catch (ClassNotFoundException e) {
+    throw new RuntimeException(e);
+}
+        builder.append("</div>");
+
+        builder.append("</body>");
+        builder.append("</html>");
+
+        try (FileWriter fw = new FileWriter("documentation.html")) {
+            fw.write(builder.toString());
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Documentation generated successfuly!");
+            alert.setContentText("The file \"documentation.html\" has been generated!");
+
+            alert.showAndWait();
+
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error while creating documentation file");
+            alert.setHeaderText("Cannot generate documentation");
+            alert.setContentText("Details: " + e.getMessage());
+
+            alert.showAndWait();
+        }
+
+    }
+
+    private static String getFullQualifiedName(Path path) {
+        StringTokenizer tokenizer = new StringTokenizer(path.toString(), "\\");
+
+        String fullQualifiedName = "";
+
+        Boolean packageStart = false;
+
+        while(tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+
+            if("classes".equals(token)) {
+                packageStart = true;
+                continue;
+            }
+
+            if(packageStart == false) {
+                continue;
+            }
+
+            if(token.endsWith(".class")) {
+                token = token.substring(0, token.indexOf("."));
+                fullQualifiedName += token;
+                break;
+            }
+
+            fullQualifiedName += token;
+            fullQualifiedName += ".";
+
+            //System.out.println("Token: " + token);
+        }
+        return fullQualifiedName;
     }
 }

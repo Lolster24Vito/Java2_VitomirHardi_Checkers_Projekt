@@ -6,6 +6,8 @@ public class PlayerMove {
     Position position;
     Boolean isMoveJump=false;
 
+
+
     public Boolean isJump() {
         return isMoveJump;
     }
@@ -14,9 +16,16 @@ public class PlayerMove {
         return position;
     }
 
+    public PieceData getPieceToMove() {
+        return pieceToMove;
+    }
+
+    public Boolean getMoveJump() {
+        return isMoveJump;
+    }
     public PlayerMove(PieceData pieceToMove, Position position) {
         this.pieceToMove = pieceToMove;
-        this.position = position;
+        this.position = new Position(position.getX(), position.getY());
     }
 
     public PlayerMove(PieceData pieceToMove, Position position, Boolean isJump) {

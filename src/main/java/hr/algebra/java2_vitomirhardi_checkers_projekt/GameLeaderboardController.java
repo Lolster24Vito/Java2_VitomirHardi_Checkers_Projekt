@@ -56,23 +56,7 @@ TableColumn<LeaderboardResult,Integer> columnTime;
         root.setCenter(table);
         tableLeaderboard=table;
         loadData();
-        /*
 
-        TableColumn nameColumn = new TableColumn("winnerName");
-        nameColumn.setCellValueFactory(new PropertyValueFactory<LeaderboardResult,String>("winnerName"));
-        TableColumn columnTime = new TableColumn("playerMatchTime");
-        columnTime.setCellValueFactory(new PropertyValueFactory<LeaderboardResult,Long>("playerMatchTime"));
-        TableColumn columnScore = new TableColumn("score");
-
-        columnScore.setCellValueFactory(new PropertyValueFactory<LeaderboardResult,Integer>("score"));
-*/
-
-        /*
-        firstNameCol.setCellValueFactory(
-    new PropertyValueFactory<Person,String>("firstName")
-);
-
-         */
     }
 
 
