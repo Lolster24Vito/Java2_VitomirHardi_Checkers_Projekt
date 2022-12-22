@@ -656,18 +656,7 @@ try{
             ReflectionUtils.readClassInfo(clazz,builder);
         }
 
-        //ul li
-        //methods
-        //fields
 
-       /* Class<?> klasa;
-        try {
-            klasa = Class.forName(fullQualifiedName);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        ReflectionUtils.readClassInfo(klasa,builder);*/
-        //debug todo remove break
     }
 
 } catch (IOException e) {
