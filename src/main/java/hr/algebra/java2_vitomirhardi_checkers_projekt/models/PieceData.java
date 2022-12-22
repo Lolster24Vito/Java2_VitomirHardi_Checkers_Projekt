@@ -1,4 +1,8 @@
-package hr.algebra.jave2_vitomirhardi_checkers_projekt.models;
+package hr.algebra.java2_vitomirhardi_checkers_projekt.models;
+
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.Position;
+
 
 import java.io.Serializable;
 

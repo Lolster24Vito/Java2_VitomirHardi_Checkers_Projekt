@@ -1,7 +1,7 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
 import hr.algebra.Utils.TimerUtils;
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerColor;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
 
 import java.io.Serializable;
 

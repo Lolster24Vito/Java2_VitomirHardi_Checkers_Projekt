@@ -1,7 +1,8 @@
-package hr.algebra.java2_vitomirhardi_checkers_projekt;
+package hr.algebra.java2_vitomirhardi_checkers_projekt.controllers;
 
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerColor;
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerInfo;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerInfo;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

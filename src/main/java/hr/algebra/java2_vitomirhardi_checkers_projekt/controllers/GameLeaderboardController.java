@@ -1,9 +1,10 @@
-package hr.algebra.java2_vitomirhardi_checkers_projekt;
+package hr.algebra.java2_vitomirhardi_checkers_projekt.controllers;
 
+import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.LeaderboardResult;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerColor;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -74,7 +75,7 @@ TableColumn<LeaderboardResult,Integer> columnTime;
 
     }
     public void goToGameStartScreen(){
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("GameStartScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("LocalGameStartScreen.fxml"));
         Scene scene = null;
         try {
             scene = new Scene(fxmlLoader.load(), 1200, 768);

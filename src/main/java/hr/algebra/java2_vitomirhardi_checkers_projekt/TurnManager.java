@@ -1,6 +1,8 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerMove;
+
+
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerMove;
 
 import java.util.ArrayList;
 import java.util.List;

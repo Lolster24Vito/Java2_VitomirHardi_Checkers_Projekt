@@ -1,7 +1,9 @@
-package hr.algebra.java2_vitomirhardi_checkers_projekt;
+package hr.algebra.java2_vitomirhardi_checkers_projekt.controllers;
 
 import hr.algebra.Utils.TimerUtils;
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerMove;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.LeaderboardResult;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerMove;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,7 +19,7 @@ import java.util.ResourceBundle;
 public class GameWinController implements Initializable {
 
 
-    public  LeaderboardResult winner;
+    public LeaderboardResult winner;
 
     public  List<PlayerMove> moves;
 
@@ -37,7 +39,7 @@ if(winner!=null){
     }
 
     public void playAgain(){
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("GameStartScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("LocalGameStartScreen.fxml"));
 
         try {
            Scene scene = new Scene(fxmlLoader.load());

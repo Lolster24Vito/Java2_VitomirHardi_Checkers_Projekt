@@ -1,6 +1,8 @@
-package hr.algebra.java2_vitomirhardi_checkers_projekt;
+package hr.algebra.java2_vitomirhardi_checkers_projekt.controllers;
 
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerMove;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.LeaderboardResult;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerMove;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,7 +12,6 @@ import javafx.scene.control.ListView;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class GameMovesController implements Initializable {

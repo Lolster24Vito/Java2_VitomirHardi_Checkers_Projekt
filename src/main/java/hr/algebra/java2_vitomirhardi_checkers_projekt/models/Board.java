@@ -1,4 +1,4 @@
-package hr.algebra.jave2_vitomirhardi_checkers_projekt.models;
+package hr.algebra.java2_vitomirhardi_checkers_projekt.models;
 
 import java.util.ArrayList;
 import java.util.List;

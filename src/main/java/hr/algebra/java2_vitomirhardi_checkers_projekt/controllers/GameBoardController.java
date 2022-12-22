@@ -1,10 +1,12 @@
-package hr.algebra.java2_vitomirhardi_checkers_projekt;
+package hr.algebra.java2_vitomirhardi_checkers_projekt.controllers;
 
-import hr.algebra.Utils.HtmlStringUtils;
 import hr.algebra.Utils.ReflectionUtils;
 import hr.algebra.Utils.TimerUtils;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.LeaderboardResult;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.TurnManager;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.*;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -19,13 +21,11 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -301,11 +301,7 @@ public class GameBoardController implements Initializable {
         GameWinController gameWinController = fxmlLoader.getController();
         gameWinController.setWinner(leaderboardResult);
         gameWinController.setMoves(turnManager.getMoves());
-        /*
 
-
-
-         */
         Stage stage = new Stage();
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(HelloApplication.getMainStage());
