@@ -73,7 +73,7 @@ public class GameBoardController implements Initializable {
     private final Color WHITE_PIECE_SELECTED_COLOR = Color.GREENYELLOW;
 
     private final Color BLACK_PIECE_COLOR = Color.rgb(71, 71, 64);
-    private final Color BLACK_PIECE_SELECTED_COLOR = Color.rgb(110,0,0);
+    private final Color BLACK_PIECE_SELECTED_COLOR = Color.rgb(110, 0, 0);
 
     private final Color AVAILABLE_MOVE_COLOR = Color.GREEN;
     private final Color AVAILABLE_MOVE_EAT = Color.RED;
@@ -84,7 +84,7 @@ public class GameBoardController implements Initializable {
     private List<PlayerMove> selectedAvailablePositions;
 
     private List<PlayerMove> allPlayerAvailablePositions;
-    private boolean isJumpInTurn=false;
+    private boolean isJumpInTurn = false;
 
 
     TurnManager turnManager = new TurnManager();
@@ -92,30 +92,30 @@ public class GameBoardController implements Initializable {
     private PlayerColor colorTurn = PlayerColor.white;
 
     //sets up pieces board,and gridPanel
-    private final  int X_COLUMN_SIZE =8;
-    private final  int Y_ROW_SIZE =8;
-private     Timer whiteTimer = new Timer();
-    private     Timer blackTimer = new Timer();
-    private long whiteTimerSeconds=0;
-    private long blackTimerSeconds=0;
+    private final int X_COLUMN_SIZE = 8;
+    private final int Y_ROW_SIZE = 8;
+    private Timer whiteTimer = new Timer();
+    private Timer blackTimer = new Timer();
+    private long whiteTimerSeconds = 0;
+    private long blackTimerSeconds = 0;
 
-TimerTask whiteTimerTask=new TimerTask() {
-    @Override
-    public void run() {
-        if(colorTurn.equals(PlayerColor.white)){
+    TimerTask whiteTimerTask = new TimerTask() {
+        @Override
+        public void run() {
+            if (colorTurn.equals(PlayerColor.white)) {
 
 
-        whiteTimerSeconds++;
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
+                whiteTimerSeconds++;
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
+                    }
+                });
             }
-        });
-        }
 
-    }
-};
+        }
+    };
     TimerTask blackTimerTask = new TimerTask() {
         @Override
         public void run() {
@@ -131,21 +131,21 @@ TimerTask whiteTimerTask=new TimerTask() {
             }
         }
     };
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initLabels();
         InitPane();
-        allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
-        isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
+        allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
+        isJumpInTurn = allPlayerAvailablePositions.stream().anyMatch(p -> p.isJump());
         refreshScore();
         whiteTimer.scheduleAtFixedRate(whiteTimerTask, 0, 1000);
         blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
 
 
-
     }
-    public void InitPane() {
 
+    public void InitPane() {
 
 
         board = new Board(X_COLUMN_SIZE, Y_ROW_SIZE);
@@ -192,11 +192,10 @@ TimerTask whiteTimerTask=new TimerTask() {
     }
 
 
-
     private void highlightJumps() {
-        if(allPlayerAvailablePositions!=null&&allPlayerAvailablePositions.size()>0&&isJumpInTurn) {
+        if (allPlayerAvailablePositions != null && allPlayerAvailablePositions.size() > 0 && isJumpInTurn) {
             for (PlayerMove possibleMove : allPlayerAvailablePositions) {
-                if(possibleMove.isJump()){
+                if (possibleMove.isJump()) {
                     Position piecePos = possibleMove.getPiecePosition();
                     board.tiles[piecePos.getX()][piecePos.getY()].setFill(BLACK_PIECE_SELECTED_COLOR);
                 }
@@ -215,17 +214,17 @@ TimerTask whiteTimerTask=new TimerTask() {
                     if (selectedPiece.hasPiece()
                             && selectedPiece.getPiece().getPieceColor().equals(colorTurn)
                             && checkIfValidMove(tile.getTileData())
-                    ){
+                    ) {
 
-                       Position tilePos=tile.getPosition();
+                        Position tilePos = tile.getPosition();
                         movePiece(selectedPiece
                                 , board.tiles[tilePos.getX()][tilePos.getY()]);
-                        Optional<PlayerMove> doneMove=selectedAvailablePositions.stream().filter(m->m.getPosition().equals(tilePos)).findFirst();
+                        Optional<PlayerMove> doneMove = selectedAvailablePositions.stream().filter(m -> m.getPosition().equals(tilePos)).findFirst();
 
 
                         //if there's more legal jumps for player dont change
-                        Boolean anotherJump=false;
-                        if(doneMove.get().isJump()) {
+                        Boolean anotherJump = false;
+                        if (doneMove.get().isJump()) {
                             if (board.tiles[tilePos.getX()][tilePos.getY()].hasPiece()) {
                                 ArrayList<PlayerMove> legalJumpsFromNewPos = board.getLegalJumpsFrom(colorTurn, board.tiles[tilePos.getX()][tilePos.getY()]
                                         .getTileData().getPiece());
@@ -238,8 +237,8 @@ TimerTask whiteTimerTask=new TimerTask() {
 
                             }
                         }
-                        if(!anotherJump)
-                        changePlayerTurn();
+                        if (!anotherJump)
+                            changePlayerTurn();
 
 
                     }
@@ -261,18 +260,16 @@ TimerTask whiteTimerTask=new TimerTask() {
         if (colorTurn.equals(PlayerColor.black)) {
             labelPlayerTurn.setText(GameStartController.getBlackPlayer().getPlayerName());
         }
-        allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
+        allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
 
 
-
-
-        if(allPlayerAvailablePositions.isEmpty()){
+        if (allPlayerAvailablePositions.isEmpty()) {
             try {
                 playerWin();
+            } catch (Exception e) {
             }
-            catch (Exception e){}
         }
-        isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
+        isJumpInTurn = allPlayerAvailablePositions.stream().anyMatch(p -> p.isJump());
         highlightJumps();
 
     }
@@ -280,16 +277,14 @@ TimerTask whiteTimerTask=new TimerTask() {
     private void playerWin() throws IOException {
 
         LeaderboardResult leaderboardResult;
-        if(colorTurn==PlayerColor.black){
-            leaderboardResult=new LeaderboardResult(GameStartController.getWhitePlayer().getPlayerName(),whiteTimerSeconds, board.getWhiteScore(),PlayerColor.white);
+        if (colorTurn == PlayerColor.black) {
+            leaderboardResult = new LeaderboardResult(GameStartController.getWhitePlayer().getPlayerName(), whiteTimerSeconds, board.getWhiteScore(), PlayerColor.white);
 
-        }
-        else{
+        } else {
             //black is winner
-            leaderboardResult=new LeaderboardResult(GameStartController.getBlackPlayer().getPlayerName(),blackTimerSeconds, board.getBlackScore(),PlayerColor.black);
+            leaderboardResult = new LeaderboardResult(GameStartController.getBlackPlayer().getPlayerName(), blackTimerSeconds, board.getBlackScore(), PlayerColor.black);
 
         }
-
 
 
         whiteTimerTask.cancel();
@@ -302,16 +297,16 @@ TimerTask whiteTimerTask=new TimerTask() {
         }
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("GameWinScreen.fxml"));
         Scene scene = null;
-            scene = new Scene(fxmlLoader.load(), 1200, 768);
-GameWinController gameWinController=fxmlLoader.getController();
-gameWinController.setWinner(leaderboardResult);
-gameWinController.setMoves(turnManager.getMoves());
+        scene = new Scene(fxmlLoader.load(), 1200, 768);
+        GameWinController gameWinController = fxmlLoader.getController();
+        gameWinController.setWinner(leaderboardResult);
+        gameWinController.setMoves(turnManager.getMoves());
         /*
 
 
 
          */
-        Stage stage=new Stage();
+        Stage stage = new Stage();
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(HelloApplication.getMainStage());
 
@@ -321,7 +316,7 @@ gameWinController.setMoves(turnManager.getMoves());
         HelloApplication.getPopupStage().setScene(scene);
         HelloApplication.getPopupStage().showAndWait();
 //showandwait()
-       // GameWinController gameWinController=loader.gerController();
+        // GameWinController gameWinController=loader.gerController();
 /*
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setContentText(colorTurn==PlayerColor.black?
@@ -335,8 +330,8 @@ a.show();*/
 
     private void clearJumpHighlights() {
         for (PlayerMove move : allPlayerAvailablePositions) {
-            if(move.isJump()){
-                Position piecePos=move.getPiecePosition();
+            if (move.isJump()) {
+                Position piecePos = move.getPiecePosition();
                 board.tiles[piecePos.getX()][piecePos.getY()].setFill(BLACK_COLOR);
             }
         }
@@ -385,7 +380,7 @@ a.show();*/
                 board.tiles[move.getPosition().getX()][move.getPosition().getY()].setFill(AVAILABLE_MOVE_EAT);
             }
         } else {
-            if(!isJumpInTurn) {
+            if (!isJumpInTurn) {
                 selectedAvailablePositions = board.getLegalMovesFrom(colorTurn, piece.getPieceData());
                 for (PlayerMove move : selectedAvailablePositions
                 ) {
@@ -407,7 +402,6 @@ a.show();*/
     }
 
 
-
     private void initLabels() {
         String whitePlayerName = GameStartController.getWhitePlayer().getPlayerName();
         labelPlayerWhiteName.setText(whitePlayerName);
@@ -420,40 +414,39 @@ a.show();*/
     private void movePiece(Tile selectedTile, Tile moveToTile) {
         Position fromPos = selectedTile.getPosition();
         Position moveToPos = moveToTile.getPosition();
-        Optional<PlayerMove> move =selectedAvailablePositions.stream().filter(m->m.getPosition().equals(moveToPos)).findFirst();
-        if(!move.isPresent())return;//move is invalid
-                //new PlayerMove(selectedTile.getTileData().getPiece(), moveToTile.getPosition());
+        Optional<PlayerMove> move = selectedAvailablePositions.stream().filter(m -> m.getPosition().equals(moveToPos)).findFirst();
+        if (!move.isPresent()) return;//move is invalid
+        //new PlayerMove(selectedTile.getTileData().getPiece(), moveToTile.getPosition());
 
         //if is jump remove tile
-        if(move.get().isJump()){
+        if (move.get().isJump()) {
             //toPos-moveToPos/2  = direction
             //origin+direction=middle
-            Position direction=new Position(
-                    (moveToPos.getX()- fromPos.getX())/2,
-                    ((moveToPos.getY())-fromPos.getY())/2);
-            Position middlePosition=new Position(fromPos.getX()+direction.getX(),fromPos.getY()+direction.getY());
+            Position direction = new Position(
+                    (moveToPos.getX() - fromPos.getX()) / 2,
+                    ((moveToPos.getY()) - fromPos.getY()) / 2);
+            Position middlePosition = new Position(fromPos.getX() + direction.getX(), fromPos.getY() + direction.getY());
             board.addJump(board.tiles[middlePosition.getX()][middlePosition.getY()].getPiece().getPieceData());
             removePieceFromTile(middlePosition.getX(), middlePosition.getY());
             refreshScore();
         }
 
-        PlayerMove turnMove=new PlayerMove(move.get().getPieceToMove(),move.get().getPosition(),move.get().getMoveJump());
-        turnManager.AddMove( turnMove);
+        PlayerMove turnMove = new PlayerMove(move.get().getPieceToMove(), move.get().getPosition(), move.get().getMoveJump());
+        turnManager.AddMove(turnMove);
         listViewMovesHistory.getItems().add(move.get().toString());
 
 
         PieceData movePieceData = selectedTile.getTileData().getPiece();
         Color pieceColor;
-        if (movePieceData.getPieceColor().equals(PlayerColor.white)){
+        if (movePieceData.getPieceColor().equals(PlayerColor.white)) {
             pieceColor = WHITE_PIECE_COLOR;
             //check if should add king
-            if(moveToPos.getY()==Y_ROW_SIZE-1){
+            if (moveToPos.getY() == Y_ROW_SIZE - 1) {
                 movePieceData.setKing();
             }
-        }
-        else{
+        } else {
             pieceColor = BLACK_PIECE_COLOR;
-            if(moveToPos.getY()==0){
+            if (moveToPos.getY() == 0) {
                 movePieceData.setKing();
             }
         }
@@ -468,12 +461,11 @@ a.show();*/
         moveToTile.setPiece(movedPiece);
 
 
-
 //add
     }
 
     private void refreshScore() {
-    labelPlayerBlackScore.setText(Integer.toString(board.getBlackScore()));
+        labelPlayerBlackScore.setText(Integer.toString(board.getBlackScore()));
         labelPlayerWhiteScore.setText(Integer.toString(board.getWhiteScore()));
 
     }
@@ -502,38 +494,38 @@ a.show();*/
         gridBoard.add(movedPiece, moveToPos.getX(), moveToPos.getY());
         board.tiles[moveToPos.getX()][moveToPos.getY()].setPiece(movedPiece);
     }
+
     public void saveGame() throws IOException {
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose where to save your game");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Save files","*.ser"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Save files", "*.ser"));
         File selectedDirectory = fileChooser.showSaveDialog(HelloApplication.getMainStage());
 
-      String name=selectedDirectory.getAbsolutePath();
+        String name = selectedDirectory.getAbsolutePath();
 
         //todo add saveTo window
-        List<PieceData> pieces=new ArrayList<>();
+        List<PieceData> pieces = new ArrayList<>();
 
-        for(int i = 0; i < X_COLUMN_SIZE; i++) {
-            for(int j = 0; j < Y_ROW_SIZE; j++) {
-                if(board.tiles[j][i].hasPiece()){
+        for (int i = 0; i < X_COLUMN_SIZE; i++) {
+            for (int j = 0; j < Y_ROW_SIZE; j++) {
+                if (board.tiles[j][i].hasPiece()) {
                     pieces.add(board.tiles[j][i].getTileData().getPiece());
                 }
 
             }
         }
-        SerializableBoard serializableBoard=new SerializableBoard(
-                pieces,colorTurn,
+        SerializableBoard serializableBoard = new SerializableBoard(
+                pieces, colorTurn,
                 GameStartController.getWhitePlayer().getPlayerName(),
                 GameStartController.getBlackPlayer().getPlayerName(),
-                whiteTimerSeconds,blackTimerSeconds
-        , board.getEatenWhitePieces(),board.getEatenWhiteKings(), board.getEatenBlackPieces(),board.getEatenBlackKings());
+                whiteTimerSeconds, blackTimerSeconds
+                , board.getEatenWhitePieces(), board.getEatenWhiteKings(), board.getEatenBlackPieces(), board.getEatenBlackKings());
 
         try (ObjectOutputStream serializator = new ObjectOutputStream(
                 new FileOutputStream(name))) {
             serializator.writeObject(serializableBoard);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setContentText("File has not been saved due to an error");
             a.show();
@@ -541,15 +533,16 @@ a.show();*/
         }
 
     }
+
     public void loadGame() throws IOException, ClassNotFoundException {
         //todo add load window
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose your save file");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Save files","*.ser"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Save files", "*.ser"));
         File selectedDirectory = fileChooser.showOpenDialog(HelloApplication.getMainStage());
-        if(selectedDirectory==null) return;
-        String name=selectedDirectory.getAbsolutePath();
-        if(!selectedDirectory.exists()){
+        if (selectedDirectory == null) return;
+        String name = selectedDirectory.getAbsolutePath();
+        if (!selectedDirectory.exists()) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setContentText("No load files have been selected");
             a.show();
@@ -568,8 +561,8 @@ a.show();*/
                 loadPieceToTile(pieceD);
             }
             //load match data
-            whiteTimerSeconds= serializableBoard.getWhiteTimerSeconds();
-            blackTimerSeconds= serializableBoard.getBlackTimerSeconds();
+            whiteTimerSeconds = serializableBoard.getWhiteTimerSeconds();
+            blackTimerSeconds = serializableBoard.getBlackTimerSeconds();
             labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
             labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds));
 
@@ -578,20 +571,19 @@ a.show();*/
             GameStartController.setBlackPlayerName(serializableBoard.getBlackPlayerName());
             labelPlayerBlackName.setText(serializableBoard.getBlackPlayerName());
             labelPlayerWhiteName.setText(serializableBoard.getWhitePlayerName());
-            colorTurn=serializableBoard.getPlayerTurn();
+            colorTurn = serializableBoard.getPlayerTurn();
             board.setEatenWhitePieces(serializableBoard.getEatenWhitePieces(), serializableBoard.getEatenWhiteKings());
             board.setEatenBlackPieces(serializableBoard.getEatenBlackPieces(), serializableBoard.getEatenBlackKings());
 
-            allPlayerAvailablePositions=board.getPlayerLegalMoves(colorTurn);
-            if(allPlayerAvailablePositions.isEmpty()){
+            allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
+            if (allPlayerAvailablePositions.isEmpty()) {
                 playerWin();
             }
-            isJumpInTurn=allPlayerAvailablePositions.stream().anyMatch(p->p.isJump());
+            isJumpInTurn = allPlayerAvailablePositions.stream().anyMatch(p -> p.isJump());
             highlightJumps();
             refreshScore();
 
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setContentText("File has not been loaded due to an error");
             a.show();
@@ -610,9 +602,9 @@ a.show();*/
     }
 
     private void clearBoard() {
-        for( int i=0;i<X_COLUMN_SIZE;i++){
-            for (int j=0;j<Y_ROW_SIZE;j++){
-            removePieceFromTile(i,j);
+        for (int i = 0; i < X_COLUMN_SIZE; i++) {
+            for (int j = 0; j < Y_ROW_SIZE; j++) {
+                removePieceFromTile(i, j);
             }
         }
     }
@@ -624,7 +616,7 @@ a.show();*/
     }
 
 
-    public void generateDocumentation(){
+    public void generateDocumentation() {
         StringBuilder builder = new StringBuilder();
         builder.append("<!DOCTYPE html>");
         builder.append("<html>");
@@ -636,34 +628,34 @@ a.show();*/
         builder.append("<h1>HTML dokumentacija projektnog zadatka</h1>");
         builder.append("<h1>Popis klasa:</h1></br>");
 
-try{
-    List<Path> pathsList = Files.walk(Paths.get("."))
-            .filter(path -> path.getFileName().toString().endsWith(".class"))
-            .collect(Collectors.toList());
-    for (Path path:pathsList){
-        String fileName = path.getFileName().toString();
+        try {
+            List<Path> pathsList = Files.walk(Paths.get("."))
+                    .filter(path -> path.getFileName().toString().endsWith(".class"))
+                    .collect(Collectors.toList());
+            for (Path path : pathsList) {
+                String fileName = path.getFileName().toString();
 
-        String fullQualifiedName = getFullQualifiedName(path);
+                String fullQualifiedName = getFullQualifiedName(path);
 
 
-        if("module-info".equals(fullQualifiedName)) {
-            continue;
-        }
+                if ("module-info".equals(fullQualifiedName)) {
+                    continue;
+                }
 
 //Klas name
-        Class<?> clazz = Class.forName(fullQualifiedName);
-        if(!clazz.isAnonymousClass()){
-            ReflectionUtils.readClassInfo(clazz,builder);
+                Class<?> clazz = Class.forName(fullQualifiedName);
+                if (!clazz.isAnonymousClass()) {
+                    ReflectionUtils.readClassInfo(clazz, builder);
+                }
+
+
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
-
-
-    }
-
-} catch (IOException e) {
-    throw new RuntimeException(e);
-} catch (ClassNotFoundException e) {
-    throw new RuntimeException(e);
-}
         builder.append("</div>");
 
         builder.append("</body>");
@@ -696,19 +688,19 @@ try{
 
         Boolean packageStart = false;
 
-        while(tokenizer.hasMoreTokens()) {
+        while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
 
-            if("classes".equals(token)) {
+            if ("classes".equals(token)) {
                 packageStart = true;
                 continue;
             }
 
-            if(packageStart == false) {
+            if (packageStart == false) {
                 continue;
             }
 
-            if(token.endsWith(".class")) {
+            if (token.endsWith(".class")) {
                 token = token.substring(0, token.indexOf("."));
                 fullQualifiedName += token;
                 break;
