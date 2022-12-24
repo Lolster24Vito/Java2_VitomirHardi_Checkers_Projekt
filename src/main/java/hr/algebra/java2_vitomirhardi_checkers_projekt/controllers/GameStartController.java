@@ -65,6 +65,7 @@ public class GameStartController {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("CheckersBoard.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
         boardController=fxmlLoader.getController();
+        boardController.setPlayers(whitePlayer,blackPlayer);
         HelloApplication.getMainStage().setTitle("Checkers");
         HelloApplication.getMainStage().setScene(scene);
         HelloApplication.getMainStage().show();

@@ -4,6 +4,7 @@ import hr.algebra.Utils.ReflectionUtils;
 import hr.algebra.Utils.TimerUtils;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.LeaderboardResult;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.MatchmakingRoom;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.TurnManager;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
@@ -99,6 +100,9 @@ public class GameBoardController implements Initializable {
     private long whiteTimerSeconds = 0;
     private long blackTimerSeconds = 0;
 
+    PlayerInfo whitePlayer;
+    PlayerInfo blackPlayer;
+
     TimerTask whiteTimerTask = new TimerTask() {
         @Override
         public void run() {
@@ -134,6 +138,7 @@ public class GameBoardController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        System.out.println("initialize gameboard");
         initLabels();
         InitPane();
         allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
@@ -490,7 +495,9 @@ a.show();*/
         gridBoard.add(movedPiece, moveToPos.getX(), moveToPos.getY());
         board.tiles[moveToPos.getX()][moveToPos.getY()].setPiece(movedPiece);
     }
-
+public void setOnlineMatch(MatchmakingRoom matchmakingRoom){
+        System.out.println("got matchmakingRoom");
+}
     public void saveGame() throws IOException {
 
         FileChooser fileChooser = new FileChooser();
@@ -708,5 +715,10 @@ a.show();*/
             //System.out.println("Token: " + token);
         }
         return fullQualifiedName;
+    }
+
+    public void setPlayers(PlayerInfo whitePlayer, PlayerInfo blackPlayer) {
+   this.whitePlayer=whitePlayer;
+   this.blackPlayer=blackPlayer;
     }
 }

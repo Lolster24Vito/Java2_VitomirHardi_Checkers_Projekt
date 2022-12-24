@@ -10,14 +10,17 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 public class ClientHandlerThread implements Runnable {
-
+//todo delete class
     private Socket socket;
 
 
     public final int PORT_NUMBER=1987;
 
+    private String roomCode;
+    private ArrayList<ClientHandlerThread>clientHandlers=new ArrayList<>();
     public ClientHandlerThread(Socket clientSocket) {
         this.socket = clientSocket;
 
@@ -34,6 +37,7 @@ public class ClientHandlerThread implements Runnable {
                     //oos.flush();
                     LoginMessage loginMessage = (LoginMessage) ois.readObject();
                     System.out.println("Received new game state DTO with the name: " + loginMessage.getUsername());
+                    this.roomCode=loginMessage.getRoomCode();
                    oos.writeObject(new LoginMessage("Login success","blamaaaa"));
                     System.out.println("Server sent login success message to " + loginMessage.getUsername());
                 }

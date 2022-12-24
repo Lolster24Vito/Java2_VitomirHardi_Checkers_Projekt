@@ -1,6 +1,8 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt.models;
 
-public class PlayerInfo {
+import java.io.Serializable;
+
+public class PlayerInfo implements Serializable {
     String playerName;
     PlayerColor color;
 //s
