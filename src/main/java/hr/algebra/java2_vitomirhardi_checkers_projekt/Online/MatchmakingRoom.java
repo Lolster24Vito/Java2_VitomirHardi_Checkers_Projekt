@@ -11,6 +11,15 @@ public class MatchmakingRoom implements Serializable {
         this.roomCode = roomCode;
     }
 
+    public RoomState getRoomState() {
+        if(playersList.size()<2){
+            return RoomState.ExistsAndWaitingForPlayers;
+        }
+        else{
+            return RoomState.ExistsAndEnoughPlayers;
+        }
+    }
+
     public MatchmakingRoom() {
     }
 
@@ -29,5 +38,9 @@ public synchronized  void addPlayer(PlayerInfo playerInfo){
         return playersList.size();
     }
 
-    String roomCode;
+    private String roomCode;
+
+    public boolean isPlayerInMatch(String username) {
+       return playersList.stream().anyMatch(p->p.getPlayerName().equals(username));
+    }
 }
