@@ -39,40 +39,37 @@ public class Server {
             while (true){
                 Socket clientSocket = serverSocket.accept();
                 System.err.println("Client connected from port: " + clientSocket.getPort()+"----"+clientSocket.getInetAddress());
-                Runnable ClientJoinRoomHandler=new Runnable() {
-                    @Override
-                    public void run() {
-                        try(
-                                ObjectOutputStream oos=new ObjectOutputStream(clientSocket.getOutputStream());
-                                ObjectInputStream ois=new ObjectInputStream(clientSocket.getInputStream());
+                Runnable ClientJoinRoomHandler= () -> {
+                    try(
+                            ObjectOutputStream oos=new ObjectOutputStream(clientSocket.getOutputStream());
+                            ObjectInputStream ois=new ObjectInputStream(clientSocket.getInputStream());
 
-                        ) {
-                            LoginMessage loginMessage=(LoginMessage)ois.readObject();
-                           System.out.println("read roomCode:"+loginMessage.getRoomCode());
-                            RoomState roomState;
-                            if(matchRooms.containsKey(loginMessage.getRoomCode())){
-                                if(!matchRooms.get(loginMessage.getRoomCode()).isPlayerInMatch(loginMessage.getUsername())) {
-                                    matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
-                                }
-                                roomState = matchRooms.get(loginMessage.getRoomCode()).getRoomState();
-                               System.out.println("wrote roomCode:"+loginMessage.getRoomCode());
-
-                           }
-                           else{
-                               roomState=RoomState.NotExists;
-                               System.out.println("wrote roomCode2:"+loginMessage.getRoomCode());
-                           }
-
-                            System.out.println("wroteBoolean");
-                            oos.writeObject(roomState);
-                            if(roomState==RoomState.ExistsAndEnoughPlayers){
-                                oos.writeObject(matchRooms.get(loginMessage.getRoomCode()));
+                    ) {
+                        LoginMessage loginMessage=(LoginMessage)ois.readObject();
+                       System.out.println("read roomCode:"+loginMessage.getRoomCode());
+                        RoomState roomState;
+                        if(matchRooms.containsKey(loginMessage.getRoomCode())){
+                            if(!matchRooms.get(loginMessage.getRoomCode()).isPlayerInMatch(loginMessage.getUsername())) {
+                                matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
                             }
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        } catch (ClassNotFoundException e) {
-                            throw new RuntimeException(e);
+                            roomState = matchRooms.get(loginMessage.getRoomCode()).getRoomState();
+                           System.out.println("wrote roomCode:"+loginMessage.getRoomCode());
+
+                       }
+                       else{
+                           roomState=RoomState.NotExists;
+                           System.out.println("wrote roomCode2:"+loginMessage.getRoomCode());
+                       }
+
+                        System.out.println("wroteBoolean");
+                        oos.writeObject(roomState);
+                        if(roomState==RoomState.ExistsAndEnoughPlayers){
+                            oos.writeObject(matchRooms.get(loginMessage.getRoomCode()));
                         }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
                     }
                 };
                 executorService.submit(ClientJoinRoomHandler);
@@ -98,11 +95,9 @@ public class Server {
                 matchRooms.put(matchRoom.getRoomCode(),matchRoom);
             }
         }
-        catch (IOException e) {
+        catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 

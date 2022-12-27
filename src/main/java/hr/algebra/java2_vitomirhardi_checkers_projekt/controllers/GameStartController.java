@@ -11,6 +11,8 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 public class GameStartController {
     @FXML
@@ -63,9 +65,10 @@ public class GameStartController {
 
 
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("CheckersBoard.fxml"));
+        fxmlLoader.setControllerFactory(c ->{return  new GameBoardController(whitePlayer,blackPlayer);} );
         Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
         boardController=fxmlLoader.getController();
-        boardController.setPlayers(whitePlayer,blackPlayer);
+      //  boardController.setPlayers(whitePlayer,blackPlayer);
         HelloApplication.getMainStage().setTitle("Checkers");
         HelloApplication.getMainStage().setScene(scene);
         HelloApplication.getMainStage().show();

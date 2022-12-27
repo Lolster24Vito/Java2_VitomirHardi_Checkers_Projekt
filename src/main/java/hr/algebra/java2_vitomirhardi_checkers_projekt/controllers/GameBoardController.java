@@ -63,6 +63,10 @@ public class GameBoardController implements Initializable {
     public GameBoardController() {
 
     }
+    public GameBoardController(PlayerInfo whitePlayer,PlayerInfo blackPlayer){
+        this.whitePlayer=whitePlayer;
+        this.blackPlayer=blackPlayer;
+    }
 
     private final double SIDE_SIZE = 70;
     private final double PIECE_SIZE = SIDE_SIZE / 2;
@@ -110,12 +114,7 @@ public class GameBoardController implements Initializable {
 
 
                 whiteTimerSeconds++;
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
-                    }
-                });
+                Platform.runLater(() -> labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds)));
             }
 
         }
@@ -126,12 +125,7 @@ public class GameBoardController implements Initializable {
             if (colorTurn.equals(PlayerColor.black)) {
 
                 blackTimerSeconds++;
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds));
-                    }
-                });
+                Platform.runLater(() -> labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds)));
             }
         }
     };
@@ -155,6 +149,8 @@ public class GameBoardController implements Initializable {
 
         board = new Board(X_COLUMN_SIZE, Y_ROW_SIZE);
         // Create 64 rectangles and add to pane
+        boolean debugBool=true;
+
         int count = 0;
         for (int i = 0; i < X_COLUMN_SIZE; i++) {
             for (int j = 0; j < Y_ROW_SIZE; j++) {
@@ -179,12 +175,15 @@ public class GameBoardController implements Initializable {
                     tile.setPiece(piece);
                     gridBoard.add(piece, j, i);
                 }
-                if ((i >= 5) && count % 2 == 1) {
-                    Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
-                    piece.setOnMouseClicked(eventPieceClicked(piece));
-                    tile.setPiece(piece);
-                    gridBoard.add(piece, j, i);
+                if(debugBool) {
+                    if ((i >= 5) && count % 2 == 1) {
+                        debugBool=false;
+                        Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
+                        piece.setOnMouseClicked(eventPieceClicked(piece));
+                        tile.setPiece(piece);
+                        gridBoard.add(piece, j, i);
 
+                    }
                 }
                 board.tiles[j][i] = tile;
 
@@ -259,11 +258,11 @@ public class GameBoardController implements Initializable {
         String playerName;
 
         if (colorTurn.equals(PlayerColor.white)) {
-            labelPlayerTurn.setText(GameStartController.getWhitePlayer().getPlayerName());
+            labelPlayerTurn.setText(whitePlayer.getPlayerName());
 
         }
         if (colorTurn.equals(PlayerColor.black)) {
-            labelPlayerTurn.setText(GameStartController.getBlackPlayer().getPlayerName());
+            labelPlayerTurn.setText(blackPlayer.getPlayerName());
         }
         allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
 
@@ -272,6 +271,8 @@ public class GameBoardController implements Initializable {
             try {
                 playerWin();
             } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println(e.getMessage());
             }
         }
         isJumpInTurn = allPlayerAvailablePositions.stream().anyMatch(p -> p.isJump());
@@ -279,15 +280,15 @@ public class GameBoardController implements Initializable {
 
     }
 
-    private void playerWin() throws IOException {
+    private void playerWin() throws IOException, ClassNotFoundException {
 
         LeaderboardResult leaderboardResult;
         if (colorTurn == PlayerColor.black) {
-            leaderboardResult = new LeaderboardResult(GameStartController.getWhitePlayer().getPlayerName(), whiteTimerSeconds, board.getWhiteScore(), PlayerColor.white);
+            leaderboardResult = new LeaderboardResult(whitePlayer.getPlayerName(), whiteTimerSeconds, board.getWhiteScore(), PlayerColor.white);
 
         } else {
             //black is winner
-            leaderboardResult = new LeaderboardResult(GameStartController.getBlackPlayer().getPlayerName(), blackTimerSeconds, board.getBlackScore(), PlayerColor.black);
+            leaderboardResult = new LeaderboardResult(blackPlayer.getPlayerName(), blackTimerSeconds, board.getBlackScore(), PlayerColor.black);
 
         }
 
@@ -295,11 +296,9 @@ public class GameBoardController implements Initializable {
         whiteTimerTask.cancel();
         blackTimerTask.cancel();
 
-        try {
+
             RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("GameWinScreen.fxml"));
         Scene scene = null;
         scene = new Scene(fxmlLoader.load(), 1200, 768);
@@ -404,9 +403,9 @@ a.show();*/
 
 
     private void initLabels() {
-        String whitePlayerName = GameStartController.getWhitePlayer().getPlayerName();
+        String whitePlayerName = whitePlayer.getPlayerName();
         labelPlayerWhiteName.setText(whitePlayerName);
-        labelPlayerBlackName.setText(GameStartController.getBlackPlayer().getPlayerName());
+        labelPlayerBlackName.setText(blackPlayer.getPlayerName());
         labelPlayerTurn.setText(whitePlayerName);
         labelStatus.setText("");
     }
@@ -520,8 +519,8 @@ public void setOnlineMatch(MatchmakingRoom matchmakingRoom){
         }
         SerializableBoard serializableBoard = new SerializableBoard(
                 pieces, colorTurn,
-                GameStartController.getWhitePlayer().getPlayerName(),
-                GameStartController.getBlackPlayer().getPlayerName(),
+                whitePlayer.getPlayerName(),
+                blackPlayer.getPlayerName(),
                 whiteTimerSeconds, blackTimerSeconds
                 , board.getEatenWhitePieces(), board.getEatenWhiteKings(), board.getEatenBlackPieces(), board.getEatenBlackKings());
 
@@ -569,9 +568,10 @@ public void setOnlineMatch(MatchmakingRoom matchmakingRoom){
             labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
             labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds));
 
+            whitePlayer=new PlayerInfo( serializableBoard.getWhitePlayerName(),PlayerColor.white);
+            blackPlayer=new PlayerInfo(serializableBoard.getBlackPlayerName(),PlayerColor.black);
 
-            GameStartController.setWhitePlayerName(serializableBoard.getWhitePlayerName());
-            GameStartController.setBlackPlayerName(serializableBoard.getBlackPlayerName());
+
             labelPlayerBlackName.setText(serializableBoard.getBlackPlayerName());
             labelPlayerWhiteName.setText(serializableBoard.getWhitePlayerName());
             colorTurn = serializableBoard.getPlayerTurn();
@@ -718,6 +718,7 @@ public void setOnlineMatch(MatchmakingRoom matchmakingRoom){
     }
 
     public void setPlayers(PlayerInfo whitePlayer, PlayerInfo blackPlayer) {
+        System.out.println("setup players");
    this.whitePlayer=whitePlayer;
    this.blackPlayer=blackPlayer;
     }

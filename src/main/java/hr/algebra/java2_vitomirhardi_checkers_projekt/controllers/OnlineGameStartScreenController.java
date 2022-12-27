@@ -64,6 +64,10 @@ public class OnlineGameStartScreenController implements Initializable {
          }
          if(roomState==RoomState.ExistsAndEnoughPlayers){
              lbRoomStatus.setText("Joining");
+             PlayerInfo whitePlayer;
+             PlayerInfo blackPlayer;
+             PlayerInfo thisPlayer;
+             loadOnlineMatch( );
          }
          if(roomState==RoomState.ExistsAndWaitingForPlayers){
              lbRoomStatus.setText("not enough players");
@@ -152,7 +156,7 @@ public class OnlineGameStartScreenController implements Initializable {
                     if (roomState == RoomState.ExistsAndWaitingForPlayers) {
                        Platform.runLater(()->lbRoomStatus.setText("Waiting game"));
                     }
-                    if (roomState == RoomState.ExistsAndEnoughPlayers) {ž
+                    if (roomState == RoomState.ExistsAndEnoughPlayers) {
                         Platform.runLater(() -> lbRoomStatus.setText("Joining game"));
 
                     }
@@ -177,7 +181,10 @@ public class OnlineGameStartScreenController implements Initializable {
 
     private void loadOnlineMatch(MatchmakingRoom matchmakingRoom) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("CheckersBoard.fxml"));
+
+        fxmlLoader.setControllerFactory(c ->{return  new GameBoardController(whitePlayer,blackPlayer,currentPlayer);} );
         Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
+        //encapsulate to new class
         boardController=fxmlLoader.getController();
         boardController.setOnlineMatch(matchmakingRoom);
         HelloApplication.getMainStage().setTitle("Checkers");
