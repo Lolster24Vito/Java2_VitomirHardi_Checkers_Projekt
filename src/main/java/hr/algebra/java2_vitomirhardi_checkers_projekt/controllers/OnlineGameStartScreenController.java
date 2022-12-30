@@ -2,7 +2,8 @@ package hr.algebra.java2_vitomirhardi_checkers_projekt.controllers;
 
 import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.LoginMessage;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.MatchmakingRoom;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.MatchmakingRoomInfo;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.RoomPing;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.RoomState;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerInfo;
 import hr.algebra.server.Server;
@@ -16,7 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -41,7 +41,7 @@ public class OnlineGameStartScreenController implements Initializable {
     private String playerName;
 
     private GameBoardController boardController;
-    private MatchmakingRoom matchmakingRoom;
+    private MatchmakingRoomInfo matchmakingRoomInfo;
 
     private PlayerInfo playerInfo;
 
@@ -52,30 +52,33 @@ public class OnlineGameStartScreenController implements Initializable {
 
         if(enteredRoomCode.isBlank()&&enteredUsername.isBlank())return;
 
-        RoomState roomState=RoomState.NotExists;
+        RoomPing roomPing=new RoomPing(RoomState.NotExists);
 
         LoginMessage loginMessage=new LoginMessage(enteredUsername,enteredRoomCode);
 
-        roomState = getRoomState(loginMessage);
+        roomPing = getRoomState(loginMessage);
 
 
-        if(roomState==RoomState.NotExists){
+        if(roomPing.getRoomState()==RoomState.NotExists){
              lbRoomStatus.setText("not exists");
          }
-         if(roomState==RoomState.ExistsAndEnoughPlayers){
+         if(roomPing.getRoomState()==RoomState.ExistsAndEnoughPlayers){
              lbRoomStatus.setText("Joining");
-             PlayerInfo whitePlayer;
-             PlayerInfo blackPlayer;
-             PlayerInfo thisPlayer;
-             loadOnlineMatch( );
+             try {
+                 loadOnlineMatch(roomPing.getMatchmakingRoom());
+             } catch (IOException e) {
+                 e.printStackTrace();
+                 throw new RuntimeException(e);
+             }
+             //ping server and get all values
          }
-         if(roomState==RoomState.ExistsAndWaitingForPlayers){
+         if(roomPing.getRoomState()==RoomState.ExistsAndWaitingForPlayers){
              lbRoomStatus.setText("not enough players");
          }
         }
 
-    private  RoomState getRoomState(LoginMessage enteredRoomCode) {
-        RoomState roomState;
+    private RoomPing getRoomState(LoginMessage enteredRoomCode) {
+        RoomPing roomState;
         try (Socket clientSocket = new Socket(Server.HOST, Server.LISTEN_ROOM_PORT);
      ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
      ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
@@ -88,8 +91,9 @@ public class OnlineGameStartScreenController implements Initializable {
                 oos.writeObject(enteredRoomCode);
                 System.out.println("recieved message from the Server");
 
-                roomState = (RoomState) ois.readObject();
-                System.out.println(roomState);
+                roomState = (RoomPing) ois.readObject();
+
+
 
 
         } catch (IOException e) {
@@ -127,7 +131,7 @@ public class OnlineGameStartScreenController implements Initializable {
             System.out.println("Sending messages to the Server");
             LoginMessage loginMessage = getLoginMessage();
             oos.writeObject(loginMessage);
-            matchmakingRoom =(MatchmakingRoom) ois.readObject();
+            matchmakingRoomInfo =(MatchmakingRoomInfo) ois.readObject();
             System.out.println("Recived messages from the Server");
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -151,14 +155,21 @@ public class OnlineGameStartScreenController implements Initializable {
                 RoomState roomState = RoomState.ExistsAndWaitingForPlayers;
                 while (roomState != RoomState.ExistsAndEnoughPlayers && roomState != RoomState.NotExists) {
                     System.out.println("checking message");
-                    roomState = getRoomState(loginMessage);
+                    RoomPing roomPing=getRoomState(loginMessage);
+                    roomState = roomPing.getRoomState();
 
                     if (roomState == RoomState.ExistsAndWaitingForPlayers) {
                        Platform.runLater(()->lbRoomStatus.setText("Waiting game"));
                     }
                     if (roomState == RoomState.ExistsAndEnoughPlayers) {
                         Platform.runLater(() -> lbRoomStatus.setText("Joining game"));
-
+                        Platform.runLater(()-> {
+                            try {
+                                loadOnlineMatch(roomPing.getMatchmakingRoom());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
                     }
                     if(roomState==RoomState.NotExists) {
                         Platform.runLater(() -> lbRoomStatus.setText("Failed to join game"));
@@ -179,14 +190,14 @@ public class OnlineGameStartScreenController implements Initializable {
 
     }
 
-    private void loadOnlineMatch(MatchmakingRoom matchmakingRoom) throws IOException {
+    private void loadOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("CheckersBoard.fxml"));
 
-        fxmlLoader.setControllerFactory(c ->{return  new GameBoardController(whitePlayer,blackPlayer,currentPlayer);} );
+        fxmlLoader.setControllerFactory(c ->{return  new GameBoardController(matchmakingRoomInfo,getLoginMessage());} );
         Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
         //encapsulate to new class
         boardController=fxmlLoader.getController();
-        boardController.setOnlineMatch(matchmakingRoom);
+        boardController.setOnlineMatch(matchmakingRoomInfo);
         HelloApplication.getMainStage().setTitle("Checkers");
         HelloApplication.getMainStage().setScene(scene);
         HelloApplication.getMainStage().show();

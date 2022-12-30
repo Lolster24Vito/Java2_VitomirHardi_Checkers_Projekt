@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class PlayerInfo implements Serializable {
     String playerName;
     PlayerColor color;
+
 //s
     public PlayerColor getColor() {
         return color;

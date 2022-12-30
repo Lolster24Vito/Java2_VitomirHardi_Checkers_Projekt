@@ -4,12 +4,17 @@ import hr.algebra.Utils.ReflectionUtils;
 import hr.algebra.Utils.TimerUtils;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.LeaderboardResult;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.MatchmakingRoom;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.LoginMessage;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.MatchmakingRoomInfo;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.PlayerMoveSerializable;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.client.PlayerConnection;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.client.interfaces.MoveReader;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.TurnManager;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -32,9 +37,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class GameBoardController implements Initializable {
+public class GameBoardController implements Initializable, MoveReader {
     @FXML
     private GridPane gridBoard;
 
@@ -59,14 +66,8 @@ public class GameBoardController implements Initializable {
     @FXML
     private ListView listViewMovesHistory;
 
-
-    public GameBoardController() {
-
-    }
-    public GameBoardController(PlayerInfo whitePlayer,PlayerInfo blackPlayer){
-        this.whitePlayer=whitePlayer;
-        this.blackPlayer=blackPlayer;
-    }
+private boolean isOnline=false;
+private PlayerInfo thisOnlinePlayer;
 
     private final double SIDE_SIZE = 70;
     private final double PIECE_SIZE = SIDE_SIZE / 2;
@@ -95,6 +96,7 @@ public class GameBoardController implements Initializable {
     TurnManager turnManager = new TurnManager();
 
     private PlayerColor colorTurn = PlayerColor.white;
+    private PlayerConnection playerConnection;
 
     //sets up pieces board,and gridPanel
     private final int X_COLUMN_SIZE = 8;
@@ -106,6 +108,7 @@ public class GameBoardController implements Initializable {
 
     PlayerInfo whitePlayer;
     PlayerInfo blackPlayer;
+    private boolean recivedData=false;
 
     TimerTask whiteTimerTask = new TimerTask() {
         @Override
@@ -130,10 +133,42 @@ public class GameBoardController implements Initializable {
         }
     };
 
+    public GameBoardController() {
+
+    }
+    public GameBoardController(PlayerInfo whitePlayer,PlayerInfo blackPlayer){
+        this.whitePlayer=whitePlayer;
+        this.blackPlayer=blackPlayer;
+    }
+    ExecutorService executorService=Executors.newSingleThreadExecutor();
+    public GameBoardController(MatchmakingRoomInfo matchmakingRoomInfo, LoginMessage currentPlayer)  {
+
+        Optional<PlayerInfo> whitePlayer = matchmakingRoomInfo.getWhitePlayer();
+        Optional<PlayerInfo> blackPlayer= matchmakingRoomInfo.getBlackPlayer();
+        Optional<PlayerInfo> thisOnlinePlayer= matchmakingRoomInfo.getPlayerByName(currentPlayer.getUsername());
+        //if(whitePlayer.isEmpty()||blackPlayer.isEmpty()||matchmakingRoom.getPlayerByName(currentPlayer.getUsername());)//todo reload to onlineMatchmaking
+
+        this.whitePlayer=whitePlayer.get();
+        this.blackPlayer=blackPlayer.get();
+        this.thisOnlinePlayer=thisOnlinePlayer.get();
+
+        try {
+            playerConnection=new PlayerConnection(thisOnlinePlayer.get(),matchmakingRoomInfo,this::madeMove);
+            executorService.execute(playerConnection);
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+
+
+        isOnline=true;
+
+    }
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("initialize gameboard");
         initLabels();
+
         InitPane();
         allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
         isJumpInTurn = allPlayerAvailablePositions.stream().anyMatch(p -> p.isJump());
@@ -163,28 +198,34 @@ public class GameBoardController implements Initializable {
                 } else {
                     tile.setFill(BLACK_COLOR);
                 }
-                tile.setOnMouseClicked(eventOnTileClick(tile));
+                tile.setOnMouseClicked(eventOnTileClick(tile.getTileData()));
 
 
                 gridBoard.add(tile, j, i);
                 //circle
                 if ((i <= 2) && count % 2 == 1) {
-
-                    Piece piece = new Piece(PIECE_SIZE, WHITE_PIECE_COLOR, new Position(j, i), PlayerColor.white);
-                    piece.setOnMouseClicked(eventPieceClicked(piece));
-                    tile.setPiece(piece);
-                    gridBoard.add(piece, j, i);
-                }
-                if(debugBool) {
-                    if ((i >= 5) && count % 2 == 1) {
-                        debugBool=false;
-                        Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
+                        Piece piece = new Piece(PIECE_SIZE, WHITE_PIECE_COLOR, new Position(j, i), PlayerColor.white);
+                    if(isClickable(PlayerColor.white)){
                         piece.setOnMouseClicked(eventPieceClicked(piece));
+                    }
                         tile.setPiece(piece);
                         gridBoard.add(piece, j, i);
 
-                    }
                 }
+              //  if(debugBool) {
+                    if ((i >= 5) && count % 2 == 1) {
+                //        debugBool=false;
+
+                            Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
+                        if(isClickable(PlayerColor.black)) {
+                            piece.setOnMouseClicked(eventPieceClicked(piece));
+                        }
+                            tile.setPiece(piece);
+                            gridBoard.add(piece, j, i);
+
+
+                    }
+                //}
                 board.tiles[j][i] = tile;
 
                 count++;
@@ -193,6 +234,10 @@ public class GameBoardController implements Initializable {
         }
 
 
+    }
+
+    private boolean isClickable(PlayerColor color) {
+        return (!isOnline) || (isOnline && thisOnlinePlayer.getColor() == color);
     }
 
 
@@ -206,49 +251,70 @@ public class GameBoardController implements Initializable {
             }
         }
     }
-
-    private EventHandler<MouseEvent> eventOnTileClick(Tile tile) {
+private boolean sentData=false;
+    private EventHandler<MouseEvent> eventOnTileClick(TileData tile) {
         return new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent t) {
-                //Function moveToPosition
-                //getFreeMovesOfSelectedPiece
-                if (selectedPieceLocation != null) {
-                    Tile selectedPiece = board.tiles[selectedPieceLocation.getX()][selectedPieceLocation.getY()];
-                    if (selectedPiece.hasPiece()
-                            && selectedPiece.getPiece().getPieceColor().equals(colorTurn)
-                            && checkIfValidMove(tile.getTileData())
-                    ) {
+                tileClick(tile);
+            }
+        };
+    }
 
-                        Position tilePos = tile.getPosition();
-                        movePiece(selectedPiece
-                                , board.tiles[tilePos.getX()][tilePos.getY()]);
-                        Optional<PlayerMove> doneMove = selectedAvailablePositions.stream().filter(m -> m.getPosition().equals(tilePos)).findFirst();
+    private void tileClick(TileData tile) {
+        //Function moveToPosition
+        //getFreeMovesOfSelectedPiece
+
+        if (selectedPieceLocation != null) {
+            Tile selectedPiece = board.tiles[selectedPieceLocation.getX()][selectedPieceLocation.getY()];
+            if (selectedPiece.hasPiece()
+                    && selectedPiece.getPiece().getPieceColor().equals(colorTurn)
+                    && checkIfValidMove(tile)
+            ) {
+
+                if(!recivedData&&isOnline&&thisOnlinePlayer.getColor()==colorTurn){
+                    try {
+                        PlayerMoveSerializable playerMoveSerializable = new PlayerMoveSerializable(board.tiles[selectedPieceLocation.getX()][selectedPieceLocation.getY()].getTileData(),
+                                tile,
+                                playerConnection.getRoomCode(),
+                                thisOnlinePlayer,selectedPiece.getPiece().getPieceData());
+                        playerConnection.writePlayerMove(playerMoveSerializable);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                }
 
 
-                        //if there's more legal jumps for player dont change
-                        Boolean anotherJump = false;
-                        if (doneMove.get().isJump()) {
-                            if (board.tiles[tilePos.getX()][tilePos.getY()].hasPiece()) {
-                                ArrayList<PlayerMove> legalJumpsFromNewPos = board.getLegalJumpsFrom(colorTurn, board.tiles[tilePos.getX()][tilePos.getY()]
-                                        .getTileData().getPiece());
-                                if (legalJumpsFromNewPos.size() > 0) {
-                                    clearJumpHighlights();
-                                    clearSelectedPieceColor();
-                                    allPlayerAvailablePositions = legalJumpsFromNewPos;
-                                    anotherJump = true;
-                                }
+                Position tilePos = tile.getPosition();
+                movePiece(selectedPiece.getTileData()
+                        , board.tiles[tilePos.getX()][tilePos.getY()].getTileData());
+                Optional<PlayerMove> doneMove = selectedAvailablePositions.stream().filter(m -> m.getPosition().equals(tilePos)).findFirst();
 
-                            }
+
+                //if there's more legal jumps for player dont change
+                Boolean anotherJump = false;
+                if (doneMove.get().isJump()) {
+                    if (board.tiles[tilePos.getX()][tilePos.getY()].hasPiece()) {
+                        ArrayList<PlayerMove> legalJumpsFromNewPos = board.getLegalJumpsFrom(colorTurn, board.tiles[tilePos.getX()][tilePos.getY()]
+                                .getTileData().getPiece());
+                        if (legalJumpsFromNewPos.size() > 0) {
+                            clearJumpHighlights();
+                            clearSelectedPieceColor();
+                            allPlayerAvailablePositions = legalJumpsFromNewPos;
+                            anotherJump = true;
                         }
-                        if (!anotherJump)
-                            changePlayerTurn();
-
 
                     }
                 }
+
+                if (!anotherJump)
+                    changePlayerTurn();
+            //&&!sentData
+
+
             }
-        };
+        }
     }
 
     private void changePlayerTurn() {
@@ -328,7 +394,12 @@ a.show();*/
 
     }
 
-    private void clearJumpHighlights() {
+    public void debugButtonSend(ActionEvent actionEvent) {
+
+
+    }
+
+        private void clearJumpHighlights() {
         for (PlayerMove move : allPlayerAvailablePositions) {
             if (move.isJump()) {
                 Position piecePos = move.getPiecePosition();
@@ -357,7 +428,7 @@ a.show();*/
 
                 //selectTileToMove,showAvailableMoves
                 if (piece.getPieceColor().equals(colorTurn)) {
-                    clickOnPiece(piece);
+                    clickOnPiece(piece.getPieceData());
                 }
                 //piece.setFill(Color.PINK);
             }
@@ -365,13 +436,13 @@ a.show();*/
     }
 
 
-    private void clickOnPiece(Piece piece) {
+    private void clickOnPiece(PieceData piece) {
         //Available Moves load
         //show piece moves
         selectedPieceLocation = piece.getPos();
         clearSelectedPieceColor();
         selectedAvailablePositions = new ArrayList<>();
-        selectedAvailablePositions = board.getLegalJumpsFrom(colorTurn, piece.getPieceData());
+        selectedAvailablePositions = board.getLegalJumpsFrom(colorTurn, piece);
         //if find any only show these as legal moves
         if (selectedAvailablePositions.size() > 0) {
             //have to make jump
@@ -381,7 +452,7 @@ a.show();*/
             }
         } else {
             if (!isJumpInTurn) {
-                selectedAvailablePositions = board.getLegalMovesFrom(colorTurn, piece.getPieceData());
+                selectedAvailablePositions = board.getLegalMovesFrom(colorTurn, piece);
                 for (PlayerMove move : selectedAvailablePositions
                 ) {
                     board.tiles[move.getPosition().getX()][move.getPosition().getY()].setFill(AVAILABLE_MOVE_COLOR);
@@ -411,7 +482,7 @@ a.show();*/
     }
 
 
-    private void movePiece(Tile selectedTile, Tile moveToTile) {
+    private void movePiece(TileData selectedTile, TileData moveToTile) {
         Position fromPos = selectedTile.getPosition();
         Position moveToPos = moveToTile.getPosition();
         Optional<PlayerMove> move = selectedAvailablePositions.stream().filter(m -> m.getPosition().equals(moveToPos)).findFirst();
@@ -435,8 +506,10 @@ a.show();*/
         turnManager.AddMove(turnMove);
         listViewMovesHistory.getItems().add(move.get().toString());
 
+        //todo infinite bug fix
 
-        PieceData movePieceData = selectedTile.getTileData().getPiece();
+
+        PieceData movePieceData = selectedTile.getPiece();
         Color pieceColor;
         if (movePieceData.getPieceColor().equals(PlayerColor.white)) {
             pieceColor = WHITE_PIECE_COLOR;
@@ -453,12 +526,14 @@ a.show();*/
 
         Piece movedPiece = new Piece(PIECE_SIZE, pieceColor, movePieceData, moveToPos);
 
+        if(isClickable(movedPiece.getPieceColor()))
         movedPiece.setOnMouseClicked(eventPieceClicked(movedPiece));
+
         removePieceFromTile(fromPos.getX(), fromPos.getY());
         selectedTile.setPiece(null);
         addPieceToTile(moveToPos, movedPiece);
 
-        moveToTile.setPiece(movedPiece);
+       board.tiles[moveToPos.getX()][moveToPos.getY()].setPiece(movedPiece);
 
 
 //add
@@ -494,7 +569,7 @@ a.show();*/
         gridBoard.add(movedPiece, moveToPos.getX(), moveToPos.getY());
         board.tiles[moveToPos.getX()][moveToPos.getY()].setPiece(movedPiece);
     }
-public void setOnlineMatch(MatchmakingRoom matchmakingRoom){
+public void setOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo){
         System.out.println("got matchmakingRoom");
 }
     public void saveGame() throws IOException {
@@ -721,5 +796,64 @@ public void setOnlineMatch(MatchmakingRoom matchmakingRoom){
         System.out.println("setup players");
    this.whitePlayer=whitePlayer;
    this.blackPlayer=blackPlayer;
+    }
+
+    @Override
+    public void madeMove(PlayerMoveSerializable playerMove) {
+        Position selectedTilePos = playerMove.getSelectedTile().getPosition();
+        PieceData movePieceData = playerMove.getSelectedTile().getPiece();
+
+        recivedData=true;
+        clickOnPiece(playerMove.getPieceData());
+        selectedAvailablePositions = board.getLegalMovesFrom(
+                colorTurn,
+                board.tiles[selectedTilePos.getX()][selectedTilePos.getY()].getTileData().getPiece());
+playerMove.getSelectedTile().setPiece(playerMove.getPieceData());
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+
+                clickOnPiece(playerMove.getPieceData());
+                movePiece(playerMove.getSelectedTile(),
+                        playerMove.getMoveToTile());
+                Position moveToPosition = playerMove.getMoveToTile().getPosition();
+                Optional<PlayerMove> doneMove = selectedAvailablePositions.stream().filter(m -> m.getPosition().equals(moveToPosition)).findFirst();
+
+
+                //if there's more legal jumps for player dont change
+                Boolean anotherJump = false;
+                if (doneMove.get().isJump()) {
+                    if (board.tiles[moveToPosition.getX()][moveToPosition.getY()].hasPiece()) {
+                        ArrayList<PlayerMove> legalJumpsFromNewPos = board.getLegalJumpsFrom(
+                                colorTurn,
+                                board.tiles[moveToPosition.getX()][moveToPosition.getY()].getTileData().getPiece()
+                        );
+                        if (legalJumpsFromNewPos.size() > 0) {
+                            clearJumpHighlights();
+                            clearSelectedPieceColor();
+                            allPlayerAvailablePositions = legalJumpsFromNewPos;
+                            anotherJump = true;
+                        }
+
+                    }
+                }
+                if(!anotherJump){
+                    changePlayerTurn();
+                }
+
+
+
+                recivedData=false;
+            }
+        });
+    //  Platform.runLater(()->);
+
+
+
+        // sentData=false;
+
+        //removePieceFromTile(selectedTilePos.getX(),selectedTilePos.getY());
+      //  loadPieceToTile();
+       // movePiece(playerMove.getSelectedTile(),playerMove.getMoveToTile());
     }
 }

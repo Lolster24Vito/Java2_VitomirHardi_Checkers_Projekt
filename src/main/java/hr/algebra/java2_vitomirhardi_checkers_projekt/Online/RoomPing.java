@@ -1,16 +1,19 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt.Online;
 
-public class RoomPing {
+import java.io.Serializable;
+
+public class RoomPing implements Serializable {
     private RoomState roomState;
-    private MatchmakingRoom matchmakingRoom=null;
+    private MatchmakingRoomInfo matchmakingRoomInfo =null;
+
 
     public RoomPing(RoomState roomState) {
         this.roomState = roomState;
     }
 
-    public RoomPing(RoomState roomState, MatchmakingRoom matchmakingRoom) {
+    public RoomPing(RoomState roomState, MatchmakingRoomInfo matchmakingRoomInfo) {
         this.roomState = roomState;
-        this.matchmakingRoom = matchmakingRoom;
+        this.matchmakingRoomInfo = matchmakingRoomInfo;
     }
 
     public RoomState getRoomState() {
@@ -21,7 +24,7 @@ public class RoomPing {
         this.roomState = roomState;
     }
 
-    public MatchmakingRoom getMatchmakingRoom() {
-        return matchmakingRoom;
+    public MatchmakingRoomInfo getMatchmakingRoom() {
+        return matchmakingRoomInfo;
     }
 }

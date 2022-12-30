@@ -1,46 +1,33 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt.Online;
 
-import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerInfo;
+import hr.algebra.server.callable.ClientTurnHandler;
 
-import java.io.Serializable;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
-public class MatchmakingRoom implements Serializable {
-    public MatchmakingRoom(String roomCode) {
-        this.roomCode = roomCode;
-    }
-
-    public RoomState getRoomState() {
-        if(playersList.size()<2){
-            return RoomState.ExistsAndWaitingForPlayers;
-        }
-        else{
-            return RoomState.ExistsAndEnoughPlayers;
-        }
-    }
+public class MatchmakingRoom {
+    private ArrayList<ClientTurnHandler> players=new ArrayList<>();
 
     public MatchmakingRoom() {
     }
-
-    private List<PlayerInfo> playersList=new ArrayList<>();
-    public synchronized String getRoomCode() {
-        return roomCode;
+    public  void addClientTurnHandler(ClientTurnHandler clientTurnHandler){
+        players.add(clientTurnHandler);
     }
-public synchronized  void addPlayer(PlayerInfo playerInfo){
-        playersList.add(playerInfo);
-    }
+    public void broadcastMove(PlayerMoveSerializable playerMoveSerializable){
+        for (ClientTurnHandler clientHandler:players
+             ) {
+            try {
+                if(!clientHandler.getThisOnlinePlayer().getPlayerName().equals(
+                        playerMoveSerializable.getPlayerInfo().getPlayerName())){
+                    clientHandler.getOos().writeObject(playerMoveSerializable);
+                }
+                else{
+                    System.out.println("didn't wrote to");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-    public synchronized void setRoomCode(String roomCode) {
-        this.roomCode = roomCode;
-    }
-    public synchronized int getPlayerCount(){
-        return playersList.size();
-    }
-
-    private String roomCode;
-
-    public boolean isPlayerInMatch(String username) {
-       return playersList.stream().anyMatch(p->p.getPlayerName().equals(username));
+        }
     }
 }
