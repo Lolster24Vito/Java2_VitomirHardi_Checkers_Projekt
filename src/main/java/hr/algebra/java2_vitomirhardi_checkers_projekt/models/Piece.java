@@ -30,6 +30,9 @@ public class Piece extends Circle {
         return pieceData;
     }
 
+    public void debugSetKing(){
+        pieceData.setKing();
+    }
 
     public Piece(double v, Paint paint, Position pos, PlayerColor pieceColor, Boolean isKing) {
         super(v,paint);

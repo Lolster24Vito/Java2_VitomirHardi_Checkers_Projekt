@@ -178,7 +178,7 @@ private PlayerInfo thisOnlinePlayer;
 
 
     }
-
+    Boolean debugBool=true;
     public void InitPane() {
 
 
@@ -208,13 +208,17 @@ private PlayerInfo thisOnlinePlayer;
                     if(isClickable(PlayerColor.white)){
                         piece.setOnMouseClicked(eventPieceClicked(piece));
                     }
+                    //todo remove
+                        piece.debugSetKing();
                         tile.setPiece(piece);
                         gridBoard.add(piece, j, i);
 
                 }
+                //4,5
+               // if(i==5&&j==4){
               //  if(debugBool) {
                     if ((i >= 5) && count % 2 == 1) {
-                //        debugBool=false;
+                     //   debugBool=false;
 
                             Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
                         if(isClickable(PlayerColor.black)) {
@@ -225,7 +229,7 @@ private PlayerInfo thisOnlinePlayer;
 
 
                     }
-                //}
+             //   }
                 board.tiles[j][i] = tile;
 
                 count++;
@@ -493,17 +497,22 @@ a.show();*/
         if (move.get().isJump()) {
             //toPos-moveToPos/2  = direction
             //origin+direction=middle
+            int distance=(int)Math.sqrt((moveToPos.getY() - fromPos.getY()) *(moveToPos.getY() - fromPos.getY())
+                    + (moveToPos.getX() - fromPos.getY()) * (moveToPos.getX() - fromPos.getY()));
             Position direction = new Position(
-                    (moveToPos.getX() - fromPos.getX()) / 2,
-                    ((moveToPos.getY()) - fromPos.getY()) / 2);
-            Position middlePosition = new Position(fromPos.getX() + direction.getX(), fromPos.getY() + direction.getY());
-            board.addJump(board.tiles[middlePosition.getX()][middlePosition.getY()].getPiece().getPieceData());
-            removePieceFromTile(middlePosition.getX(), middlePosition.getY());
+                    (moveToPos.getX() - fromPos.getX()) / distance,
+                    ((moveToPos.getY()) - fromPos.getY()) / distance);
+            // /2
+            //Position middlePosition = new Position(fromPos.getX() + direction.getX(), fromPos.getY() + direction.getY());
+            Position removePiecePosition = move.get().getTakenPiecePosition();
+
+            board.addJump(board.tiles[removePiecePosition.getX()][removePiecePosition.getY()].getPiece().getPieceData());
+            removePieceFromTile(removePiecePosition.getX(), removePiecePosition.getY());
             refreshScore();
         }
 
-        PlayerMove turnMove = new PlayerMove(move.get().getPieceToMove(), move.get().getPosition(), move.get().getMoveJump());
-        turnManager.AddMove(turnMove);
+      //  PlayerMove turnMove = new PlayerMove(move.get().getPieceToMove(), move.get().getPosition(), move.get().getMoveJump());
+        turnManager.AddMove(move.get());
         listViewMovesHistory.getItems().add(move.get().toString());
 
         //todo infinite bug fix

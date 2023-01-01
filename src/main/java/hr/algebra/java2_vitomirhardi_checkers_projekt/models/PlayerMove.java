@@ -2,11 +2,14 @@ package hr.algebra.java2_vitomirhardi_checkers_projekt.models;
 
 public class PlayerMove {
 
-    PieceData pieceToMove;
-    Position position;
-    Boolean isMoveJump=false;
+    private  PieceData pieceToMove;
+    private  Position position;
+    private  Boolean isMoveJump=false;
+   private Position takenPiecePosition;
 
-
+    public Position getTakenPiecePosition() {
+        return takenPiecePosition;
+    }
 
     public Boolean isJump() {
         return isMoveJump;
@@ -28,10 +31,11 @@ public class PlayerMove {
         this.position = new Position(position.getX(), position.getY());
     }
 
-    public PlayerMove(PieceData pieceToMove, Position position, Boolean isJump) {
+    public PlayerMove(PieceData pieceToMove,Position takenPiecePosition,Position position, Boolean isJump) {
         this.pieceToMove = new PieceData(pieceToMove.pos,pieceToMove.getIsKing(),pieceToMove.getPieceColor());
         this.position = position;
         this.isMoveJump = isJump;
+        this.takenPiecePosition=takenPiecePosition;
     }
 
     @Override

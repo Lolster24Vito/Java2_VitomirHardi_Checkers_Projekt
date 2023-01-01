@@ -1,6 +1,7 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt.models;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Board {
@@ -55,21 +56,60 @@ public class Board {
         Position piecePos = piece.pos;
 
 
-        if (canJump(playerTurn, piece, piecePos.getTopRight(), piecePos.getTopRight(2)))
-            moves.add(new PlayerMove(piece, piecePos.getTopRight(2), true));
+        if(piece.getIsKing()){
+            Position direction= getDirectionFromNeighbours(piecePos, piecePos.getTopRight());
 
-        if (canJump(playerTurn, piece, piecePos.getTopLeft(), piecePos.getTopLeft(2)))
-            moves.add(new PlayerMove(piece, piecePos.getTopLeft(2), true));
+            moves.addAll(getKingJumps(playerTurn, piece, piecePos,getDirectionFromNeighbours(piecePos, piecePos.getTopRight())));
+            moves.addAll(getKingJumps(playerTurn, piece, piecePos,getDirectionFromNeighbours(piecePos, piecePos.getTopLeft())));
+            moves.addAll(getKingJumps(playerTurn, piece, piecePos,getDirectionFromNeighbours(piecePos, piecePos.getBottomLeft())));
+            moves.addAll(getKingJumps(playerTurn, piece, piecePos,getDirectionFromNeighbours(piecePos, piecePos.getBottomRight())));
 
-        if (canJump(playerTurn, piece, piecePos.getBottomRight(), piecePos.getBottomRight(2)))
-            moves.add(new PlayerMove(piece, piecePos.getBottomRight(2), true));
 
-        if (canJump(playerTurn, piece, piecePos.getBottomLeft(), piecePos.getBottomLeft(2)))
-            moves.add(new PlayerMove(piece, piecePos.getBottomLeft(2), true));
+        }
+        else {
+            if (canJump(playerTurn, piece, piecePos.getTopRight(), piecePos.getTopRight(2)))
+                moves.add(new PlayerMove(piece,piecePos.getTopRight(), piecePos.getTopRight(2), true));
 
+            if (canJump(playerTurn, piece, piecePos.getTopLeft(), piecePos.getTopLeft(2)))
+                moves.add(new PlayerMove(piece,piecePos.getTopLeft(), piecePos.getTopLeft(2), true));
+
+            if (canJump(playerTurn, piece, piecePos.getBottomRight(), piecePos.getBottomRight(2)))
+                moves.add(new PlayerMove(piece,piecePos.getBottomRight(), piecePos.getBottomRight(2), true));
+
+            if (canJump(playerTurn, piece, piecePos.getBottomLeft(), piecePos.getBottomLeft(2)))
+                moves.add(new PlayerMove(piece,piecePos.getBottomLeft(), piecePos.getBottomLeft(2), true));
+        }
         return moves;
     }
 
+    private static Position getDirectionFromNeighbours(Position piecePos, Position globalDirectionPosition) {
+        return new Position(globalDirectionPosition.getX() - piecePos.getX(),
+                globalDirectionPosition.getY() - piecePos.getY());
+    }
+
+    private Collection<PlayerMove> getKingJumps(PlayerColor playerTurn, PieceData piece, Position piecePos, Position direction) {
+        Collection<PlayerMove> kingJumps=new ArrayList<>();
+boolean ableToMove=false;
+        for (int i = 1; i <X_ROW_SIZE ; i++) {
+
+            Position checkPosition=piecePos.getPosInDirection(direction,i);
+            Position check2Position=piecePos.getPosInDirection(direction,i+1);
+            boolean isEmptyLine=true;
+            for (int j = i-1; j >0 ; j--) {
+                isEmptyLine=canMove(playerTurn,piece,piecePos.getPosInDirection(direction,j));
+                if(!isEmptyLine)break;
+            }
+            ableToMove=canJump(playerTurn, piece, checkPosition,check2Position);
+            if (ableToMove&&isEmptyLine) {
+                Position canMovePos=Position.subtract(checkPosition,direction);
+                kingJumps.add(new PlayerMove(piece,checkPosition,check2Position,true));
+            }
+
+        }
+
+
+        return kingJumps;
+    }
 
 
     public boolean checkIfEmptyTile(Position dir, Position piecePosition) {
@@ -139,17 +179,55 @@ public class Board {
         ArrayList<PlayerMove> moves = new ArrayList<>();
         if (piece.getPieceColor().equals(playerTurn)) {
             Position piecePos = piece.getPos();
-            if (canMove(playerTurn, piece, piecePos.getTopRight()))
-                moves.add(new PlayerMove(piece, piecePos.getTopRight()));
-            if (canMove(playerTurn, piece, piecePos.getTopLeft()))
-                moves.add(new PlayerMove(piece, piecePos.getTopLeft()));
-            if (canMove(playerTurn, piece, piecePos.getBottomRight()))
-                moves.add(new PlayerMove(piece, piecePos.getBottomRight()));
-            if (canMove(playerTurn, piece, piecePos.getBottomLeft()))
-                moves.add(new PlayerMove(piece, piecePos.getBottomLeft()));
+
+            if (piece.getIsKing()) {
+                Position directionTopRight = Position.subtract(piecePos.getTopRight(), piecePos);
+                Position directionTopLEFT = Position.subtract(piecePos.getTopLeft(), piecePos);
+                Position directionBotTomRight = Position.subtract(piecePos.getBottomRight(), piecePos);
+                Position directionBottomLeft = Position.subtract(piecePos.getBottomLeft(), piecePos);
+
+                moves.addAll(getKingMoves(playerTurn, piece, piecePos, directionTopRight));
+                moves.addAll(getKingMoves(playerTurn, piece, piecePos, directionTopLEFT));
+                moves.addAll(getKingMoves(playerTurn, piece, piecePos, directionBotTomRight));
+                moves.addAll(getKingMoves(playerTurn, piece, piecePos, directionBottomLeft));
+
+            }
+            else {
+
+
+                if (canMove(playerTurn, piece, piecePos.getTopRight())) {
+                    moves.add(new PlayerMove(piece, piecePos.getTopRight()));
+                }
+
+                if (canMove(playerTurn, piece, piecePos.getTopLeft())) {
+
+                    if (piece.getIsKing())
+                        moves.addAll(getKingMoves(playerTurn, piece, piecePos, piecePos.getTopLeft()));
+                    else
+                        moves.add(new PlayerMove(piece, piecePos.getTopLeft()));
+                }
+                if (canMove(playerTurn, piece, piecePos.getBottomRight()))
+                    moves.add(new PlayerMove(piece, piecePos.getBottomRight()));
+                if (canMove(playerTurn, piece, piecePos.getBottomLeft()))
+                    moves.add(new PlayerMove(piece, piecePos.getBottomLeft()));
+            }
         }
         return moves;
 
+    }
+
+    private Collection<PlayerMove> getKingMoves(PlayerColor playerTurn, PieceData piece, Position piecePos, Position direction) {
+      Collection<PlayerMove> kingMoves=new ArrayList<>();
+        int multiplier=1;
+        boolean ableToMove=true;
+        while(ableToMove) {
+            ableToMove=canMove(playerTurn, piece, piecePos.getPosInDirection(direction,multiplier));
+            if (ableToMove) {
+                kingMoves.add(new PlayerMove(piece, piecePos.getPosInDirection(direction,multiplier)));
+            }
+            multiplier++;
+        }
+        return kingMoves;
     }
 
     public int getWhiteScore() {

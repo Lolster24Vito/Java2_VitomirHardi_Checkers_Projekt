@@ -19,8 +19,8 @@ public class HelloApplication extends Application {
     public void start(Stage stage) throws IOException {
         this.mainStage = stage;
 //        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("CheckersBoard.fxml"));
-       FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("LocalGameStartScreen.fxml"));
-       //FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("OnlineGameStartScreen.fxml"));
+      FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("LocalGameStartScreen.fxml"));
+//       FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("OnlineGameStartScreen.fxml"));
 
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Hello!");

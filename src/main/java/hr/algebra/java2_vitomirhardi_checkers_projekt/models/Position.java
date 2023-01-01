@@ -49,6 +49,11 @@ public class Position implements Serializable {
         return new Position(xPos-(1*multiplier),yPos-(1*multiplier));
     }
 
+    public static Position subtract(Position pos1,Position pos2){
+        return new  Position(pos1.getX()- pos2.getX(),
+                pos1.getY()-pos2.getY());
+    }
+
     public Position getPosInDirection(int x,int y){
         return new Position(xPos+x,yPos+y);
     }
@@ -56,6 +61,7 @@ public class Position implements Serializable {
     public void setY(int yPos) {
         this.yPos = yPos;
     }
+
 
 
     @Override
@@ -74,5 +80,9 @@ public class Position implements Serializable {
     @Override
     public String toString() {
         return (xPos+","+yPos);
+    }
+
+    public Position getPosInDirection(Position direction, int multiplier) {
+        return new Position(xPos+(direction.getX()*multiplier),yPos+(direction.getY()*multiplier));
     }
 }
