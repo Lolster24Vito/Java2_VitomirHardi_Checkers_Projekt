@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class PlayerConnection implements Runnable {
@@ -19,8 +21,10 @@ public class PlayerConnection implements Runnable {
     private ObjectInputStream ois;
     private final MatchmakingRoomInfo matchmakingRoomInfo;
     private MoveReader moveReader;
+    private List<PlayerMoveSerializable> moves;
 
     public PlayerConnection(PlayerInfo thisOnlinePlayer,MatchmakingRoomInfo matchmakingRoomInfo,MoveReader moveReader) throws IOException {
+        moves=new ArrayList<>();
         clientSocket = new Socket(Server.HOST, Server.LISTEN_TURN_PORT);
          oos = new ObjectOutputStream(clientSocket.getOutputStream());
          ois = new ObjectInputStream(clientSocket.getInputStream());
@@ -28,9 +32,6 @@ public class PlayerConnection implements Runnable {
         oos.writeObject(thisOnlinePlayer);
         oos.writeObject(matchmakingRoomInfo.getRoomCode());
         this.moveReader=moveReader;
-
-
-
     }
     public void writePlayerMove(PlayerMoveSerializable playerMove) throws IOException {
         oos.writeObject(playerMove);

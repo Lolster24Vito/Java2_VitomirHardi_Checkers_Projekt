@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ClientTurnHandler implements Runnable {
 
     private static HashMap<String, MatchmakingRoom> matchmakingRooms=new HashMap<>();
+
     private Socket clientSocket;
    private ObjectOutputStream oos ;
    private  ObjectInputStream ois;
@@ -37,10 +40,10 @@ public class ClientTurnHandler implements Runnable {
             matchmakingRooms.put(roomCode,new MatchmakingRoom());
         }
             matchmakingRooms.get(roomCode).addClientTurnHandler(this);
+          // oos.writeObject(matchmakingRooms.get(roomCode).getMoves());
         } catch (Exception e) {
-            closeEverything();
             e.printStackTrace();
-            throw new RuntimeException(e);
+            closeEverything();
         }
 
     }
@@ -54,27 +57,28 @@ public class ClientTurnHandler implements Runnable {
             oos.close();
             ois.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("AlreadyClosed");
         }
 
     }
 
     @Override
     public void run() {
-    while (true){
         try {
+    while (clientSocket.isConnected()){
 
-    PlayerMoveSerializable playerMoveSerializable=(PlayerMoveSerializable) ois.readObject();
 
+         PlayerMoveSerializable playerMoveSerializable=(PlayerMoveSerializable) ois.readObject();
+            matchmakingRooms.get(roomCode).addMove(playerMoveSerializable);
             matchmakingRooms.get(roomCode).broadcastMove(playerMoveSerializable);
 
-        } catch (Exception e) {
-            System.out.println("errorr ReadObject");
-            closeEverything();
-            e.printStackTrace();
-           // throw new RuntimeException(e);
-        }
     }
+        } catch (Exception e) {
+            matchmakingRooms.get(roomCode).removeClientTurnHandler(this);
+            System.out.println("Error reading object");
+            closeEverything();
+          //  e.printStackTrace();
+        }
     }
 
 }

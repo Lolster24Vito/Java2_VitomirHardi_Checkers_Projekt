@@ -1,17 +1,27 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt.Online;
 
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.SerializableBoard;
 import hr.algebra.server.runnable.ClientTurnHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MatchmakingRoom {
     private ArrayList<ClientTurnHandler> players=new ArrayList<>();
+
+
+    private List<PlayerMoveSerializable> moves=new ArrayList<>();
+
 
     public MatchmakingRoom() {
     }
     public  void addClientTurnHandler(ClientTurnHandler clientTurnHandler){
         players.add(clientTurnHandler);
+    }
+    public  void removeClientTurnHandler(ClientTurnHandler clientTurnHandler){
+        players.remove(clientTurnHandler);
+
     }
     public void broadcastMove(PlayerMoveSerializable playerMoveSerializable){
         for (ClientTurnHandler clientHandler:players
@@ -28,4 +38,14 @@ public class MatchmakingRoom {
 
         }
     }
+
+    public void addMove(PlayerMoveSerializable playerMoveSerializable) {
+        moves.add(playerMoveSerializable);
+    }
+    public List<PlayerMoveSerializable> getMoves() {
+        return moves;
+    }
+
+
+
 }

@@ -160,7 +160,6 @@ private PlayerInfo thisOnlinePlayer;
 
         }
 
-
         isOnline=true;
 
     }
@@ -209,7 +208,7 @@ private PlayerInfo thisOnlinePlayer;
                         piece.setOnMouseClicked(eventPieceClicked(piece));
                     }
                     //todo remove
-                        piece.debugSetKing();
+                       // piece.debugSetKing();
                         tile.setPiece(piece);
                         gridBoard.add(piece, j, i);
 
@@ -255,7 +254,6 @@ private PlayerInfo thisOnlinePlayer;
             }
         }
     }
-private boolean sentData=false;
     private EventHandler<MouseEvent> eventOnTileClick(TileData tile) {
         return new EventHandler<MouseEvent>() {
             @Override
@@ -591,16 +589,8 @@ public void setOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo){
         String name = selectedDirectory.getAbsolutePath();
 
         //todo add saveTo window
-        List<PieceData> pieces = new ArrayList<>();
+        List<PieceData> pieces = getBoardPieces();
 
-        for (int i = 0; i < X_COLUMN_SIZE; i++) {
-            for (int j = 0; j < Y_ROW_SIZE; j++) {
-                if (board.tiles[j][i].hasPiece()) {
-                    pieces.add(board.tiles[j][i].getTileData().getPiece());
-                }
-
-            }
-        }
         SerializableBoard serializableBoard = new SerializableBoard(
                 pieces, colorTurn,
                 whitePlayer.getPlayerName(),
@@ -620,7 +610,20 @@ public void setOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo){
 
     }
 
-    public void loadGame() throws IOException, ClassNotFoundException {
+    private List<PieceData> getBoardPieces() {
+        ArrayList<PieceData> pieces=new ArrayList<>();
+        for (int i = 0; i < X_COLUMN_SIZE; i++) {
+            for (int j = 0; j < Y_ROW_SIZE; j++) {
+                if (board.tiles[j][i].hasPiece()) {
+                    pieces.add(board.tiles[j][i].getTileData().getPiece());
+                }
+
+            }
+        }
+        return pieces;
+    }
+
+    public void loadGame() {
         //todo add load window
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose your save file");
@@ -855,14 +858,6 @@ playerMove.getSelectedTile().setPiece(playerMove.getPieceData());
                 recivedData=false;
             }
         });
-    //  Platform.runLater(()->);
 
-
-
-        // sentData=false;
-
-        //removePieceFromTile(selectedTilePos.getX(),selectedTilePos.getY());
-      //  loadPieceToTile();
-       // movePiece(playerMove.getSelectedTile(),playerMove.getMoveToTile());
     }
 }

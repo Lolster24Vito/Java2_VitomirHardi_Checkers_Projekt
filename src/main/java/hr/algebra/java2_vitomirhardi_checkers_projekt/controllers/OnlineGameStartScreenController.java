@@ -45,6 +45,7 @@ public class OnlineGameStartScreenController implements Initializable {
 
     private PlayerInfo playerInfo;
 
+    private ExecutorService executorService=Executors.newSingleThreadExecutor();
 
     public void btnJoinAction(ActionEvent actionEvent) {
         String enteredRoomCode = tfRoomCode.getText().trim();
@@ -77,7 +78,7 @@ public class OnlineGameStartScreenController implements Initializable {
          }
         }
 
-    private RoomPing getRoomState(LoginMessage enteredRoomCode) {
+    private RoomPing getRoomState(LoginMessage loginMessage) {
         RoomPing roomState;
         try (Socket clientSocket = new Socket(Server.HOST, Server.LISTEN_ROOM_PORT);
      ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -88,18 +89,19 @@ public class OnlineGameStartScreenController implements Initializable {
 
                 System.out.println("Sending messages to the Server");
 
-                oos.writeObject(enteredRoomCode);
+                oos.writeObject(loginMessage);
                 System.out.println("recieved message from the Server");
 
                 roomState = (RoomPing) ois.readObject();
-
-
+            System.out.println("Read object from the Server");
 
 
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
 
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return roomState;
@@ -133,11 +135,13 @@ public class OnlineGameStartScreenController implements Initializable {
             oos.writeObject(loginMessage);
             matchmakingRoomInfo =(MatchmakingRoomInfo) ois.readObject();
             System.out.println("Recived messages from the Server");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (IOException|ClassNotFoundException e) {
+            serverErrorMessage();
         }
+    }
+    private void serverErrorMessage(){
+        System.err.println("Error couldn't connect to server");
+        lbRoomStatus.setText("Error couldn't connect to server ");
     }
 
     private LoginMessage getLoginMessage() {
@@ -148,7 +152,10 @@ public class OnlineGameStartScreenController implements Initializable {
     private void listenForPlayersJoin()  {
 
         LoginMessage loginMessage=getLoginMessage();
-        ExecutorService executorService=Executors.newSingleThreadExecutor();
+        executorService=Executors.newSingleThreadExecutor();
+
+
+
         Runnable checkForRoomChange=new Runnable() {
             @Override
             public void run() {
@@ -167,6 +174,7 @@ public class OnlineGameStartScreenController implements Initializable {
                             try {
                                 loadOnlineMatch(roomPing.getMatchmakingRoom());
                             } catch (IOException e) {
+                                e.printStackTrace();
                                 throw new RuntimeException(e);
                             }
                         });
@@ -177,8 +185,10 @@ public class OnlineGameStartScreenController implements Initializable {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                        System.out.println("Server listener has been terminated");
+                        Thread.currentThread().isInterrupted();
+                        return;
+                        }
 
 
 
@@ -218,5 +228,11 @@ public class OnlineGameStartScreenController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
+    }
+
+    public void closeThreads() {
+        if(!executorService.isShutdown()){
+            executorService.shutdownNow();
+        }
     }
 }

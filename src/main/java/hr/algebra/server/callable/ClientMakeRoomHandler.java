@@ -19,7 +19,6 @@ public class ClientMakeRoomHandler implements Callable<MatchmakingRoomInfo> {
 
     public ClientMakeRoomHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
-
     }
 
     @Override
@@ -28,7 +27,6 @@ public class ClientMakeRoomHandler implements Callable<MatchmakingRoomInfo> {
                 ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
                 ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream())
         ) {
-            //oos.flush();
             LoginMessage loginMessage = (LoginMessage) ois.readObject();
             System.out.println("Received new game state DTO with the name: " + loginMessage.getUsername());
             MatchmakingRoomInfo matchmakingRoomInfo =new MatchmakingRoomInfo(loginMessage.getRoomCode());

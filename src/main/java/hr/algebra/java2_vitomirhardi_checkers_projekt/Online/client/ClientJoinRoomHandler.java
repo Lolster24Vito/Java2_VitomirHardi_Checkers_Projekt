@@ -24,7 +24,7 @@ public class ClientJoinRoomHandler implements  Runnable{
     public void run() {
 
         RoomState roomState = RoomState.ExistsAndWaitingForPlayers;
-        roomState = getRoomState(loginMessage);
+    //    roomState = getRoomState(loginMessage);
 
         while (roomState != RoomState.ExistsAndEnoughPlayers && roomState != RoomState.NotExists) {
 

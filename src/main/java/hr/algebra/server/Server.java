@@ -10,14 +10,16 @@ import hr.algebra.server.runnable.ClientTurnHandler;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.*;
 
 public class Server {
 
     //private static ArrayList<ClientHandlerThread> clientHandlers = new ArrayList();
-    private static HashMap<String, MatchmakingRoomInfo> matchRooms=new HashMap<>();
-    private static HashMap<String, MatchmakingRoom> matchmakingRoomsPlaying =new HashMap<>();
+
+    public static HashMap<String, MatchmakingRoomInfo> matchRooms=new HashMap<>();
+
 
 
     public static final String HOST = "localhost";
@@ -51,6 +53,7 @@ public class Server {
 
         }
     } catch (IOException e) {
+        e.printStackTrace();
         throw new RuntimeException(e);
     }
     }
@@ -63,55 +66,19 @@ public class Server {
                 Socket clientSocket = serverSocket.accept();
                 ClientJoinRoomHandler clientJoinRoomHandler=new ClientJoinRoomHandler(clientSocket);
                 System.err.println("Client connected from port: " + clientSocket.getPort()+"----"+clientSocket.getInetAddress());
-                Runnable ClientJoinRoomHandler= () -> {
+
+              /*  Runnable ClientJoinRoomHandler= () -> {
                     extracted(clientSocket);
-                };
-                executorService.submit(clientJoinRoomHandler);
+                };*/
+                executorService.execute(clientJoinRoomHandler);
+
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void extracted(Socket clientSocket) {
-        try(
-                ObjectOutputStream oos=new ObjectOutputStream(clientSocket.getOutputStream());
-                ObjectInputStream ois=new ObjectInputStream(clientSocket.getInputStream());
 
-        ) {
-            LoginMessage loginMessage=(LoginMessage)ois.readObject();
-           System.out.println("read roomCode:"+loginMessage.getRoomCode());
-            RoomState roomState;
-            RoomPing roomPing;
-            if(matchRooms.containsKey(loginMessage.getRoomCode())){
-                if(!matchRooms.get(loginMessage.getRoomCode()).isPlayerInMatch(loginMessage.getUsername())) {
-                    matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
-                }
-                roomState = matchRooms.get(loginMessage.getRoomCode()).getRoomState();
-               System.out.println("wrote roomCode:"+loginMessage.getRoomCode());
-
-           }
-           else{
-               roomState=RoomState.NotExists;
-               System.out.println("wrote roomCode2:"+loginMessage.getRoomCode());
-           }
-
-            System.out.println("wroteBoolean");
-            if(roomState==RoomState.ExistsAndEnoughPlayers){
-                roomPing=new RoomPing(roomState,matchRooms.get(loginMessage.getRoomCode()));
-                oos.writeObject(roomPing);
-
-            }
-            else {
-                roomPing=new RoomPing(roomState);
-                oos.writeObject(roomPing);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private static void acceptMakeRoomRequests() {
         //CyclicBarrier cyclicBarrier=new CyclicBarrier(2);
@@ -122,7 +89,6 @@ public class Server {
             while (true){
                 Socket clientSocket = serverSocket.accept();
                 System.err.println("Client connected from port: " + clientSocket.getPort()+"----"+clientSocket.getInetAddress());
-              //  Callable<MatchmakingRoom> callableMakeMatch=new ClientRoomHandler(clientSocket,cyclicBarrier, matchmakingRoom);
                 Callable<MatchmakingRoomInfo> callableMakeMatch=new ClientMakeRoomHandler(clientSocket);
                 MatchmakingRoomInfo matchRoom= executorService.submit(callableMakeMatch).get();
                 System.out.println(matchRoom.getRoomCode());
@@ -130,8 +96,10 @@ public class Server {
             }
         }
         catch (IOException | InterruptedException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
