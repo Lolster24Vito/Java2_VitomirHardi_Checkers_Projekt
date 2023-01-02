@@ -3,8 +3,9 @@ package hr.algebra.server;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.*;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerInfo;
+import hr.algebra.server.callable.ClientJoinRoomHandler;
 import hr.algebra.server.callable.ClientMakeRoomHandler;
-import hr.algebra.server.callable.ClientTurnHandler;
+import hr.algebra.server.runnable.ClientTurnHandler;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -57,52 +58,57 @@ public class Server {
     private static void acceptRoomJoinRequests() {
         ExecutorService executorService= Executors.newCachedThreadPool();
         try(ServerSocket serverSocket=new ServerSocket(LISTEN_ROOM_PORT)){
-            System.err.println("Serversssssssssssssss listening on port: " + serverSocket.getLocalPort());
+            System.err.println("Server listening on port: " + serverSocket.getLocalPort());
             while (true){
                 Socket clientSocket = serverSocket.accept();
+                ClientJoinRoomHandler clientJoinRoomHandler=new ClientJoinRoomHandler(clientSocket);
                 System.err.println("Client connected from port: " + clientSocket.getPort()+"----"+clientSocket.getInetAddress());
                 Runnable ClientJoinRoomHandler= () -> {
-                    try(
-                            ObjectOutputStream oos=new ObjectOutputStream(clientSocket.getOutputStream());
-                            ObjectInputStream ois=new ObjectInputStream(clientSocket.getInputStream());
-
-                    ) {
-                        LoginMessage loginMessage=(LoginMessage)ois.readObject();
-                       System.out.println("read roomCode:"+loginMessage.getRoomCode());
-                        RoomState roomState;
-                        RoomPing roomPing;
-                        if(matchRooms.containsKey(loginMessage.getRoomCode())){
-                            if(!matchRooms.get(loginMessage.getRoomCode()).isPlayerInMatch(loginMessage.getUsername())) {
-                                matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
-                            }
-                            roomState = matchRooms.get(loginMessage.getRoomCode()).getRoomState();
-                           System.out.println("wrote roomCode:"+loginMessage.getRoomCode());
-
-                       }
-                       else{
-                           roomState=RoomState.NotExists;
-                           System.out.println("wrote roomCode2:"+loginMessage.getRoomCode());
-                       }
-
-                        System.out.println("wroteBoolean");
-                        if(roomState==RoomState.ExistsAndEnoughPlayers){
-                            roomPing=new RoomPing(roomState,matchRooms.get(loginMessage.getRoomCode()));
-                            oos.writeObject(roomPing);
-
-                        }
-                        else {
-                            roomPing=new RoomPing(roomState);
-                            oos.writeObject(roomPing);
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
+                    extracted(clientSocket);
                 };
-                executorService.submit(ClientJoinRoomHandler);
+                executorService.submit(clientJoinRoomHandler);
             }
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void extracted(Socket clientSocket) {
+        try(
+                ObjectOutputStream oos=new ObjectOutputStream(clientSocket.getOutputStream());
+                ObjectInputStream ois=new ObjectInputStream(clientSocket.getInputStream());
+
+        ) {
+            LoginMessage loginMessage=(LoginMessage)ois.readObject();
+           System.out.println("read roomCode:"+loginMessage.getRoomCode());
+            RoomState roomState;
+            RoomPing roomPing;
+            if(matchRooms.containsKey(loginMessage.getRoomCode())){
+                if(!matchRooms.get(loginMessage.getRoomCode()).isPlayerInMatch(loginMessage.getUsername())) {
+                    matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
+                }
+                roomState = matchRooms.get(loginMessage.getRoomCode()).getRoomState();
+               System.out.println("wrote roomCode:"+loginMessage.getRoomCode());
+
+           }
+           else{
+               roomState=RoomState.NotExists;
+               System.out.println("wrote roomCode2:"+loginMessage.getRoomCode());
+           }
+
+            System.out.println("wroteBoolean");
+            if(roomState==RoomState.ExistsAndEnoughPlayers){
+                roomPing=new RoomPing(roomState,matchRooms.get(loginMessage.getRoomCode()));
+                oos.writeObject(roomPing);
+
+            }
+            else {
+                roomPing=new RoomPing(roomState);
+                oos.writeObject(roomPing);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

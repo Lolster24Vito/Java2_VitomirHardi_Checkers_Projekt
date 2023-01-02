@@ -1,4 +1,4 @@
-package hr.algebra.server.callable;
+package hr.algebra.server.runnable;
 
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.MatchmakingRoom;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.PlayerMoveSerializable;
@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ClientTurnHandler implements Runnable {
@@ -43,6 +42,7 @@ public class ClientTurnHandler implements Runnable {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+
     }
     public PlayerInfo getThisOnlinePlayer() {
         return thisOnlinePlayer;
@@ -70,7 +70,7 @@ public class ClientTurnHandler implements Runnable {
 
         } catch (Exception e) {
             System.out.println("errorr ReadObject");
-
+            closeEverything();
             e.printStackTrace();
            // throw new RuntimeException(e);
         }
