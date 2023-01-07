@@ -12,9 +12,10 @@ import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.client.interfaces.M
 import hr.algebra.java2_vitomirhardi_checkers_projekt.TurnManager;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.rmiServer.ChatService;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +25,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -36,6 +38,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,6 +71,11 @@ public class GameBoardController implements Initializable, MoveReader {
 
     @FXML
     private ListView listViewMovesHistory;
+    @FXML
+    private  ListView lvMessages;
+    @FXML
+    private TextField tfMessage;
+
 
 private boolean isOnline=false;
 private PlayerInfo thisOnlinePlayer;
@@ -133,6 +144,10 @@ private PlayerInfo thisOnlinePlayer;
         }
     };
 
+    private SerializableBoard onlineSerializedBoard;
+    ExecutorService executorService=Executors.newFixedThreadPool(2);
+    ChatService stub=null;
+    int chatSize=0;
     public GameBoardController() {
 
     }
@@ -140,7 +155,18 @@ private PlayerInfo thisOnlinePlayer;
         this.whitePlayer=whitePlayer;
         this.blackPlayer=blackPlayer;
     }
-    ExecutorService executorService=Executors.newSingleThreadExecutor();
+
+    public void sendMessage(){
+        try {
+            stub.sendMessage(thisOnlinePlayer.getPlayerName(),tfMessage.getText());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+
+
+    }
     public GameBoardController(MatchmakingRoomInfo matchmakingRoomInfo, LoginMessage currentPlayer)  {
 
         Optional<PlayerInfo> whitePlayer = matchmakingRoomInfo.getWhitePlayer();
@@ -154,15 +180,56 @@ private PlayerInfo thisOnlinePlayer;
 
         try {
             playerConnection=new PlayerConnection(thisOnlinePlayer.get(),matchmakingRoomInfo,this::madeMove);
+
             executorService.execute(playerConnection);
+            if(playerConnection.getSerializableBoard()!=null) {
+                onlineSerializedBoard = playerConnection.getSerializableBoard();
+            }
         } catch (IOException e) {
             e.printStackTrace();
 
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+            stub = (ChatService) registry.lookup(ChatService.REMOTE_OBJECT_NAME);
+        } catch (NotBoundException | RemoteException e) {
+            e.printStackTrace();
+        }
+        executorService.execute(() -> {
+            try {
+                while (true) {
+                    if (stub.getChatSize() != chatSize) {
+                        chatSize = stub.getChatSize();
+                        Platform.runLater(() -> updateChatMessages());
+                    }
+                    Thread.sleep(1000);
+                }
+            } catch (RemoteException|InterruptedException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+
+
+        });
 
         isOnline=true;
 
     }
+
+    private void updateChatMessages() {
+        try {
+            List<String> chatHistory = stub.getChatHistory();
+            chatMessages.clear();
+            chatHistory.forEach(m->chatMessages.add(m));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    ObservableList<String> chatMessages;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("initialize gameboard");
@@ -174,6 +241,8 @@ private PlayerInfo thisOnlinePlayer;
         refreshScore();
         whiteTimer.scheduleAtFixedRate(whiteTimerTask, 0, 1000);
         blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
+        chatMessages= FXCollections.observableArrayList();
+        lvMessages.setItems(chatMessages);
 
 
     }
@@ -280,7 +349,7 @@ private PlayerInfo thisOnlinePlayer;
                                 tile,
                                 playerConnection.getRoomCode(),
                                 thisOnlinePlayer,selectedPiece.getPiece().getPieceData());
-                        playerConnection.writePlayerMove(playerMoveSerializable);
+                        playerConnection.writePlayerMove(playerMoveSerializable,getSerializableBoard());
                     } catch (IOException e) {
                         e.printStackTrace();
                         throw new RuntimeException(e);
@@ -396,10 +465,7 @@ a.show();*/
 
     }
 
-    public void debugButtonSend(ActionEvent actionEvent) {
 
-
-    }
 
         private void clearJumpHighlights() {
         for (PlayerMove move : allPlayerAvailablePositions) {
@@ -589,14 +655,8 @@ public void setOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo){
         String name = selectedDirectory.getAbsolutePath();
 
         //todo add saveTo window
-        List<PieceData> pieces = getBoardPieces();
 
-        SerializableBoard serializableBoard = new SerializableBoard(
-                pieces, colorTurn,
-                whitePlayer.getPlayerName(),
-                blackPlayer.getPlayerName(),
-                whiteTimerSeconds, blackTimerSeconds
-                , board.getEatenWhitePieces(), board.getEatenWhiteKings(), board.getEatenBlackPieces(), board.getEatenBlackKings());
+        SerializableBoard serializableBoard = getSerializableBoard();
 
         try (ObjectOutputStream serializator = new ObjectOutputStream(
                 new FileOutputStream(name))) {
@@ -608,6 +668,16 @@ public void setOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo){
 
         }
 
+    }
+
+    private SerializableBoard getSerializableBoard() {
+        SerializableBoard serializableBoard = new SerializableBoard(
+                getBoardPieces(), colorTurn,
+                whitePlayer.getPlayerName(),
+                blackPlayer.getPlayerName(),
+                whiteTimerSeconds, blackTimerSeconds
+                , board.getEatenWhitePieces(), board.getEatenWhiteKings(), board.getEatenBlackPieces(), board.getEatenBlackKings());
+        return serializableBoard;
     }
 
     private List<PieceData> getBoardPieces() {
@@ -680,7 +750,15 @@ public void setOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo){
         }
 
     }
-
+//synchronize
+    /*while(datotekaZauteta){
+    wait()
+    }
+    datotekaZauteta=true
+    citaj pisi
+    datotekaZauzeta=false
+    notifyAll
+     */
     private void loadPieceToTile(PieceData pieceD) {
         Color pieceColor = pieceD.getPieceColor() == PlayerColor.white ? WHITE_PIECE_COLOR : BLACK_PIECE_COLOR;
         Piece piece = new Piece(PIECE_SIZE, pieceColor, pieceD);

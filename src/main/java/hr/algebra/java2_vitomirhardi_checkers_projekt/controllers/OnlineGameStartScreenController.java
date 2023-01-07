@@ -22,6 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ResourceBundle;
 import java.util.concurrent.*;
 
@@ -159,14 +160,26 @@ public class OnlineGameStartScreenController implements Initializable {
         Runnable checkForRoomChange=new Runnable() {
             @Override
             public void run() {
-                RoomState roomState = RoomState.ExistsAndWaitingForPlayers;
-                while (roomState != RoomState.ExistsAndEnoughPlayers && roomState != RoomState.NotExists) {
-                    System.out.println("checking message");
-                    RoomPing roomPing=getRoomState(loginMessage);
-                    roomState = roomPing.getRoomState();
+                RoomState roomState=RoomState.ExistsAndWaitingForPlayers;
+                try (Socket clientSocket = new Socket(Server.HOST, Server.LISTEN_ROOM_PORT);
+                     ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
+                     ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
+                ) {
+                    while (roomState != RoomState.ExistsAndEnoughPlayers && roomState != RoomState.NotExists) {
+
+                    System.err.println("Client is listening for changes from " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
+
+                    System.out.println("Sending messages to the Server");
+
+                    oos.writeObject(loginMessage);
+                    System.out.println("recieved message from the Server");
+
+                        RoomPing roomPing = (RoomPing) ois.readObject();
+                    System.out.println("Read object from the Server");
+                        roomState = roomPing.getRoomState();
 
                     if (roomState == RoomState.ExistsAndWaitingForPlayers) {
-                       Platform.runLater(()->lbRoomStatus.setText("Waiting game"));
+                        Platform.runLater(()->lbRoomStatus.setText("Waiting game"));
                     }
                     if (roomState == RoomState.ExistsAndEnoughPlayers) {
                         Platform.runLater(() -> lbRoomStatus.setText("Joining game"));
@@ -188,10 +201,24 @@ public class OnlineGameStartScreenController implements Initializable {
                         System.out.println("Server listener has been terminated");
                         Thread.currentThread().isInterrupted();
                         return;
-                        }
+                    }
 
 
 
+                }
+
+                    System.out.println("checking message");
+
+
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
 
             }
@@ -207,7 +234,7 @@ public class OnlineGameStartScreenController implements Initializable {
         Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
         //encapsulate to new class
         boardController=fxmlLoader.getController();
-        boardController.setOnlineMatch(matchmakingRoomInfo);
+     //   boardController.setOnlineMatch(matchmakingRoomInfo);
         HelloApplication.getMainStage().setTitle("Checkers");
         HelloApplication.getMainStage().setScene(scene);
         HelloApplication.getMainStage().show();

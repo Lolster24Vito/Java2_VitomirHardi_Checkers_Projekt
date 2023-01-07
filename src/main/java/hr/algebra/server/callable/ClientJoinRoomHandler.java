@@ -31,7 +31,6 @@ public class ClientJoinRoomHandler implements Runnable {
             ois = new ObjectInputStream(clientSocket.getInputStream());
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
     }
 
@@ -61,36 +60,35 @@ public class ClientJoinRoomHandler implements Runnable {
         RoomState roomState;
         RoomPing roomPing;
         try{
-            loginMessage=(LoginMessage)ois.readObject();
+            do {
+                loginMessage = (LoginMessage) ois.readObject();
 
-            if(Server.matchRooms.containsKey(loginMessage.getRoomCode())){
-                if(!Server.matchRooms.get(loginMessage.getRoomCode()).isPlayerInMatch(loginMessage.getUsername())) {
-                    Server.matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
+                if (Server.matchRooms.containsKey(loginMessage.getRoomCode())) {
+                    if (!Server.matchRooms.get(loginMessage.getRoomCode()).isPlayerInMatch(loginMessage.getUsername())) {
+                        Server.matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
+                    }
+                    roomState = Server.matchRooms.get(loginMessage.getRoomCode()).getRoomState();
+
+                } else {
+                    roomState = RoomState.NotExists;
                 }
-                roomState = Server.matchRooms.get(loginMessage.getRoomCode()).getRoomState();
 
-            }
-            else{
-                roomState=RoomState.NotExists;
-            }
+                System.out.println("wroteBoolean");
+                if (roomState == RoomState.ExistsAndEnoughPlayers) {
+                    roomPing = new RoomPing(roomState, Server.matchRooms.get(loginMessage.getRoomCode()));
+                    oos.writeObject(roomPing);
+                } else {
+                    roomPing = new RoomPing(roomState);
+                    oos.writeObject(roomPing);
+                }
+            }while (!clientSocket.isClosed()&&roomState==RoomState.ExistsAndWaitingForPlayers);
 
-            System.out.println("wroteBoolean");
-            if(roomState==RoomState.ExistsAndEnoughPlayers){
-                roomPing=new RoomPing(roomState,Server.matchRooms.get(loginMessage.getRoomCode()));
-                oos.writeObject(roomPing);
-            }
-            else {
-                roomPing=new RoomPing(roomState);
-                oos.writeObject(roomPing);
-            }
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             closeConnection();
 
         }
-        finally {
-            closeConnection();
-        }
+
     }
 }

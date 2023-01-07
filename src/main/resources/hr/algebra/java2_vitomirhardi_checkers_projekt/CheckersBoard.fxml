@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
@@ -55,7 +56,11 @@
       </FlowPane>
    </bottom>
    <right>
-      <ListView fx:id="listViewMovesHistory" prefHeight="362.0" prefWidth="192.0" BorderPane.alignment="CENTER" />
+      <VBox prefHeight="375.0" prefWidth="192.0" BorderPane.alignment="CENTER">
+         <children>
+            <ListView fx:id="listViewMovesHistory" prefHeight="363.0" prefWidth="192.0" />
+         </children>
+      </VBox>
    </right>
    <left>
       <FlowPane alignment="CENTER" prefHeight="240.0" prefWidth="85.0" BorderPane.alignment="CENTER">
@@ -63,7 +68,13 @@
             <Label fx:id="labelStatus" text="Status:" />
             <Label text="Player turn:" />
             <Label fx:id="labelPlayerTurn" text="Name" />
-            <Button mnemonicParsing="false" onAction="#debugButtonSend" text="Button" />
+            <VBox alignment="CENTER">
+               <children>
+                  <ListView fx:id="lvMessages" prefHeight="200.0" prefWidth="182.0" />
+                  <TextField fx:id="tfMessage" />
+                  <Button contentDisplay="CENTER" mnemonicParsing="false" onAction="#sendMessage" text="Send" />
+               </children>
+            </VBox>
          </children>
       </FlowPane>
    </left>

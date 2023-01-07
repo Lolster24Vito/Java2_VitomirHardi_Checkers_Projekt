@@ -4,6 +4,7 @@ import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.MatchmakingRoomInfo
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.PlayerMoveSerializable;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.client.interfaces.MoveReader;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerInfo;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.SerializableBoard;
 import hr.algebra.server.Server;
 
 import java.io.IOException;
@@ -21,20 +22,27 @@ public class PlayerConnection implements Runnable {
     private ObjectInputStream ois;
     private final MatchmakingRoomInfo matchmakingRoomInfo;
     private MoveReader moveReader;
-    private List<PlayerMoveSerializable> moves;
 
-    public PlayerConnection(PlayerInfo thisOnlinePlayer,MatchmakingRoomInfo matchmakingRoomInfo,MoveReader moveReader) throws IOException {
-        moves=new ArrayList<>();
+    private SerializableBoard serializableBoard;
+
+    public SerializableBoard getSerializableBoard() {
+        return serializableBoard;
+    }
+
+    public PlayerConnection(PlayerInfo thisOnlinePlayer, MatchmakingRoomInfo matchmakingRoomInfo, MoveReader moveReader) throws IOException, ClassNotFoundException {
+
         clientSocket = new Socket(Server.HOST, Server.LISTEN_TURN_PORT);
          oos = new ObjectOutputStream(clientSocket.getOutputStream());
          ois = new ObjectInputStream(clientSocket.getInputStream());
         this.matchmakingRoomInfo=matchmakingRoomInfo;
         oos.writeObject(thisOnlinePlayer);
         oos.writeObject(matchmakingRoomInfo.getRoomCode());
+        serializableBoard=(SerializableBoard)ois.readObject();
         this.moveReader=moveReader;
     }
-    public void writePlayerMove(PlayerMoveSerializable playerMove) throws IOException {
+    public void writePlayerMove(PlayerMoveSerializable playerMove, SerializableBoard serializableBoard) throws IOException {
         oos.writeObject(playerMove);
+        oos.writeObject(serializableBoard);
     }
     public void closeConnection(){
         try {

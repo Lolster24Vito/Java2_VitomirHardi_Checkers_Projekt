@@ -3,6 +3,7 @@ package hr.algebra.server.runnable;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.MatchmakingRoom;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.PlayerMoveSerializable;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerInfo;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.SerializableBoard;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,7 +16,7 @@ import java.util.List;
 public class ClientTurnHandler implements Runnable {
 
     private static HashMap<String, MatchmakingRoom> matchmakingRooms=new HashMap<>();
-
+    private SerializableBoard serializableBoard;
     private Socket clientSocket;
    private ObjectOutputStream oos ;
    private  ObjectInputStream ois;
@@ -36,10 +37,14 @@ public class ClientTurnHandler implements Runnable {
         ois = new ObjectInputStream(clientSocket.getInputStream());
         thisOnlinePlayer=(PlayerInfo)ois.readObject();
         roomCode=(String)ois.readObject();
+
         if(!matchmakingRooms.containsKey(roomCode)){
             matchmakingRooms.put(roomCode,new MatchmakingRoom());
         }
             matchmakingRooms.get(roomCode).addClientTurnHandler(this);
+
+        oos.writeObject( matchmakingRooms.get(roomCode).getSerializableBoard());
+
           // oos.writeObject(matchmakingRooms.get(roomCode).getMoves());
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,7 +74,9 @@ public class ClientTurnHandler implements Runnable {
 
 
          PlayerMoveSerializable playerMoveSerializable=(PlayerMoveSerializable) ois.readObject();
+        serializableBoard=(SerializableBoard)ois.readObject();
             matchmakingRooms.get(roomCode).addMove(playerMoveSerializable);
+            matchmakingRooms.get(roomCode).setSerializableBoard(serializableBoard);
             matchmakingRooms.get(roomCode).broadcastMove(playerMoveSerializable);
 
     }

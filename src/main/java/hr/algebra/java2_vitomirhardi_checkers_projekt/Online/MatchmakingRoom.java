@@ -10,7 +10,15 @@ import java.util.List;
 public class MatchmakingRoom {
     private ArrayList<ClientTurnHandler> players=new ArrayList<>();
 
+    public SerializableBoard getSerializableBoard() {
+        return serializableBoard;
+    }
 
+    public void setSerializableBoard(SerializableBoard serializableBoard) {
+        this.serializableBoard = serializableBoard;
+    }
+
+    private SerializableBoard serializableBoard;
     private List<PlayerMoveSerializable> moves=new ArrayList<>();
 
 
@@ -41,9 +49,6 @@ public class MatchmakingRoom {
 
     public void addMove(PlayerMoveSerializable playerMoveSerializable) {
         moves.add(playerMoveSerializable);
-    }
-    public List<PlayerMoveSerializable> getMoves() {
-        return moves;
     }
 
 
