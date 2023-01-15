@@ -58,7 +58,7 @@
    <right>
       <VBox prefHeight="375.0" prefWidth="192.0" BorderPane.alignment="CENTER">
          <children>
-            <ListView fx:id="listViewMovesHistory" prefHeight="131.0" prefWidth="192.0" />
+            <ListView fx:id="listViewMovesHistory" prefHeight="363.0" prefWidth="192.0" />
          </children>
       </VBox>
    </right>
