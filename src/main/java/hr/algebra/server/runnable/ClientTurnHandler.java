@@ -67,6 +67,7 @@ public class ClientTurnHandler implements Runnable {
 
     }
 
+
     @Override
     public void run() {
         try {
@@ -74,11 +75,11 @@ public class ClientTurnHandler implements Runnable {
 
 
          PlayerMoveSerializable playerMoveSerializable=(PlayerMoveSerializable) ois.readObject();
-        serializableBoard=(SerializableBoard)ois.readObject();
+          serializableBoard=(SerializableBoard)ois.readObject();
+
             matchmakingRooms.get(roomCode).addMove(playerMoveSerializable);
             matchmakingRooms.get(roomCode).setSerializableBoard(serializableBoard);
             matchmakingRooms.get(roomCode).broadcastMove(playerMoveSerializable);
-
     }
         } catch (Exception e) {
             matchmakingRooms.get(roomCode).removeClientTurnHandler(this);

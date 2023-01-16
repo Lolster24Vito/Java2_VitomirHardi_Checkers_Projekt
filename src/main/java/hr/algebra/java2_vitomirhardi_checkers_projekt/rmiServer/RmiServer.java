@@ -9,7 +9,8 @@ public class RmiServer {
     private static final int RANDOM_PORT_HINT=0;
     private static final int RMI_PORT=1099;
 
-    public static void main(String[] args) {
+
+    public static void Init(){
 
         try {
             Registry registry = LocateRegistry.createRegistry(RMI_PORT);

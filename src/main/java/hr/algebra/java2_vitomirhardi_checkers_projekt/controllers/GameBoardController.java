@@ -13,6 +13,7 @@ import hr.algebra.java2_vitomirhardi_checkers_projekt.TurnManager;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.rmiServer.ChatService;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.rmiServer.RmiServer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -45,6 +46,8 @@ import java.rmi.registry.Registry;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class GameBoardController implements Initializable, MoveReader {
@@ -191,6 +194,27 @@ private PlayerInfo thisOnlinePlayer;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+        rmiInit();
+
+        isOnline=true;
+
+    }
+
+
+    private void updateChatMessages() {
+        List<String> chatHistory = null;
+        try {
+            chatHistory = stub.getChatHistory();
+            chatMessages.clear();
+            chatHistory.forEach(m->chatMessages.add(m));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private void rmiInit() {
         try {
             Registry registry = LocateRegistry.getRegistry("localhost", 1099);
             stub = (ChatService) registry.lookup(ChatService.REMOTE_OBJECT_NAME);
@@ -210,24 +234,11 @@ private PlayerInfo thisOnlinePlayer;
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
-
-
         });
 
-        isOnline=true;
-
     }
 
-    private void updateChatMessages() {
-        try {
-            List<String> chatHistory = stub.getChatHistory();
-            chatMessages.clear();
-            chatHistory.forEach(m->chatMessages.add(m));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
+
 
     ObservableList<String> chatMessages;
     @Override
@@ -284,9 +295,9 @@ private PlayerInfo thisOnlinePlayer;
                 }
                 //4,5
                // if(i==5&&j==4){
-              //  if(debugBool) {
+                if(debugBool) {
                     if ((i >= 5) && count % 2 == 1) {
-                     //   debugBool=false;
+                        debugBool=false;
 
                             Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
                         if(isClickable(PlayerColor.black)) {
@@ -297,7 +308,7 @@ private PlayerInfo thisOnlinePlayer;
 
 
                     }
-             //   }
+                }
                 board.tiles[j][i] = tile;
 
                 count++;
@@ -498,7 +509,6 @@ a.show();*/
                 if (piece.getPieceColor().equals(colorTurn)) {
                     clickOnPiece(piece.getPieceData());
                 }
-                //piece.setFill(Color.PINK);
             }
         };
     }
@@ -566,8 +576,6 @@ a.show();*/
             Position direction = new Position(
                     (moveToPos.getX() - fromPos.getX()) / distance,
                     ((moveToPos.getY()) - fromPos.getY()) / distance);
-            // /2
-            //Position middlePosition = new Position(fromPos.getX() + direction.getX(), fromPos.getY() + direction.getY());
             Position removePiecePosition = move.get().getTakenPiecePosition();
 
             board.addJump(board.tiles[removePiecePosition.getX()][removePiecePosition.getY()].getPiece().getPieceData());

@@ -89,6 +89,7 @@ public class ClientJoinRoomHandler implements Runnable {
             closeConnection();
 
         }
+        closeConnection();
 
     }
 }

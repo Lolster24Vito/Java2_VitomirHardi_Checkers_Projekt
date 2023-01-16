@@ -24,6 +24,7 @@ public class PlayerConnection implements Runnable {
     private MoveReader moveReader;
 
     private SerializableBoard serializableBoard;
+    private boolean shouldRun=true;
 
     public SerializableBoard getSerializableBoard() {
         return serializableBoard;
@@ -61,15 +62,13 @@ public class PlayerConnection implements Runnable {
 
     @Override
     public void run() {
-        while (true){
+        while (shouldRun){
             try{
                 PlayerMoveSerializable playerMoveSerializable=(PlayerMoveSerializable) ois.readObject();
                 System.out.println("ReadObject");
                 moveReader.madeMove(playerMoveSerializable);
             } catch (Exception e) {
                 System.out.println("errorr ReadObject");
-
-                e.printStackTrace();
             }
         }
     }

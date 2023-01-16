@@ -10,11 +10,11 @@ import java.util.List;
 public class MatchmakingRoom {
     private ArrayList<ClientTurnHandler> players=new ArrayList<>();
 
-    public SerializableBoard getSerializableBoard() {
+    public  synchronized SerializableBoard getSerializableBoard() {
         return serializableBoard;
     }
 
-    public void setSerializableBoard(SerializableBoard serializableBoard) {
+    public synchronized  void setSerializableBoard(SerializableBoard serializableBoard) {
         this.serializableBoard = serializableBoard;
     }
 

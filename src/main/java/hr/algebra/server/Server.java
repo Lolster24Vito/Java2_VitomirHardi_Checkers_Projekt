@@ -3,6 +3,7 @@ package hr.algebra.server;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.Online.*;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerInfo;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.rmiServer.RmiServer;
 import hr.algebra.server.callable.ClientJoinRoomHandler;
 import hr.algebra.server.callable.ClientMakeRoomHandler;
 import hr.algebra.server.runnable.ClientTurnHandler;
@@ -36,6 +37,8 @@ public class Server {
         executorService.submit(Server::acceptMakeRoomRequests);
         executorService.submit(Server::acceptRoomJoinRequests);
         executorService.submit(Server::acceptMovesRequests);
+
+        RmiServer.Init();
         //acceptMakeRoomRequests();
         //acceptRoomJoinRequests();
     }

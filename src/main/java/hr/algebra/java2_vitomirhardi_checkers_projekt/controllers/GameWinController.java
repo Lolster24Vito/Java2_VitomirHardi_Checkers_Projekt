@@ -54,19 +54,20 @@ if(winner!=null){
     }
     public void ViewMatchMoves(){
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("GameMovesScreen.fxml"));
-        Scene scene = null;
         try {
-            scene = new Scene(fxmlLoader.load(), 1200, 768);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
+
 
         GameMovesController gameMovesController=fxmlLoader.getController();
        gameMovesController.setMoves(FXCollections.observableArrayList(moves));
-gameMovesController.setWinScreenLeaderboardResult(winner);
+        gameMovesController.setWinScreenLeaderboardResult(winner);
         HelloApplication.getPopupStage().setTitle("Game moves");
         HelloApplication.getPopupStage().setScene(scene);
         HelloApplication.getPopupStage().show();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public  void setWinner(LeaderboardResult winner) {
@@ -80,5 +81,21 @@ gameMovesController.setWinScreenLeaderboardResult(winner);
         this.moves = moves;
     }
 
+    public void btnReplayMatchMovesAction(){
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("MatchReplayScreen.fxml"));
+        try {
+
+
+        Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
+
+        HelloApplication.getPopupStage().setTitle("Game replay moves");
+        HelloApplication.getPopupStage().setScene(scene);
+        HelloApplication.getPopupStage().show();
+        }
+         catch (IOException e) {
+            e.printStackTrace();
+
+        }
+    }
 
 }

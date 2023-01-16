@@ -15,18 +15,16 @@ public class HelloApplication extends Application {
     public static void setPopupStage(Stage popupStage) {
         HelloApplication.popupStage = popupStage;
     }
-private OnlineGameStartScreenController onlineGameStartScreenController;
     @Override
     public void start(Stage stage) throws IOException {
         this.mainStage = stage;
 //        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("CheckersBoard.fxml"));
 //      FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("LocalGameStartScreen.fxml"));
-       FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("OnlineGameStartScreen.fxml"));
-
+       //FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("OnlineGameStartScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("MainStartScreen.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        onlineGameStartScreenController=fxmlLoader.getController();
-        stage.setTitle("Hello!");
-        stage.setOnCloseRequest(e->onlineGameStartScreenController.closeThreads());
+
+
         stage.setScene(scene);
         stage.show();
     }
