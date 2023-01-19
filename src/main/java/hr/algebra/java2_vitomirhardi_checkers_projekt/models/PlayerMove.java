@@ -7,6 +7,10 @@ public class PlayerMove {
     private  Boolean isMoveJump=false;
    private Position takenPiecePosition;
 
+
+    public PlayerMove() {
+    }
+
     public Position getTakenPiecePosition() {
         return takenPiecePosition;
     }
@@ -26,13 +30,14 @@ public class PlayerMove {
     public Boolean getMoveJump() {
         return isMoveJump;
     }
+
     public PlayerMove(PieceData pieceToMove, Position position) {
-        this.pieceToMove = pieceToMove;
+        this.pieceToMove = new PieceData(pieceToMove);
         this.position = new Position(position.getX(), position.getY());
     }
 
     public PlayerMove(PieceData pieceToMove,Position takenPiecePosition,Position position, Boolean isJump) {
-        this.pieceToMove = new PieceData(pieceToMove.pos,pieceToMove.getIsKing(),pieceToMove.getPieceColor());
+        this.pieceToMove = new PieceData(pieceToMove);
         this.position = position;
         this.isMoveJump = isJump;
         this.takenPiecePosition=takenPiecePosition;

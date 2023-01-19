@@ -50,12 +50,12 @@ public class Board {
 
 
 
-    public ArrayList<PlayerMove> getLegalJumpsFrom(PlayerColor playerTurn, PieceData piece) {
+    public ArrayList<PlayerMove> getLegalJumpsFrom(PlayerColor playerTurn, PieceData pieceRef) {
         //    private boolean canJump(PlayerColor playerTurn, PieceData piece, Position p1, Position p2) {
         ArrayList<PlayerMove> moves = new ArrayList<PlayerMove>();  // The legal jumps will be stored in this list.
-        Position piecePos = piece.pos;
-
-
+        Position piecePos = pieceRef.pos;
+//added so that piecedata doesnt change in later functions
+        PieceData piece=new PieceData(pieceRef);
         if(piece.getIsKing()){
             Position direction= getDirectionFromNeighbours(piecePos, piecePos.getTopRight());
 

@@ -13,7 +13,7 @@ import hr.algebra.java2_vitomirhardi_checkers_projekt.TurnManager;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.rmiServer.ChatService;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.rmiServer.RmiServer;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlConfiguration;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,10 +44,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class GameBoardController implements Initializable, MoveReader {
@@ -83,8 +82,8 @@ public class GameBoardController implements Initializable, MoveReader {
 private boolean isOnline=false;
 private PlayerInfo thisOnlinePlayer;
 
-    private final double SIDE_SIZE = 70;
-    private final double PIECE_SIZE = SIDE_SIZE / 2;
+    public static  final double SIDE_SIZE = 70;
+    public static final double PIECE_SIZE = SIDE_SIZE / 2;
 
     private final Color WHITE_COLOR = Color.rgb(150, 111, 51);
     private final Color BLACK_COLOR = Color.rgb(30, 0, 0);
@@ -113,8 +112,8 @@ private PlayerInfo thisOnlinePlayer;
     private PlayerConnection playerConnection;
 
     //sets up pieces board,and gridPanel
-    private final int X_COLUMN_SIZE = 8;
-    private final int Y_ROW_SIZE = 8;
+    public static final int X_COLUMN_SIZE = 8;
+    public static final int Y_ROW_SIZE = 8;
     private Timer whiteTimer = new Timer();
     private Timer blackTimer = new Timer();
     private long whiteTimerSeconds = 0;
@@ -154,6 +153,7 @@ private PlayerInfo thisOnlinePlayer;
     public GameBoardController() {
 
     }
+    //Offline local constructor
     public GameBoardController(PlayerInfo whitePlayer,PlayerInfo blackPlayer){
         this.whitePlayer=whitePlayer;
         this.blackPlayer=blackPlayer;
@@ -170,6 +170,7 @@ private PlayerInfo thisOnlinePlayer;
 
 
     }
+    //Online constructor
     public GameBoardController(MatchmakingRoomInfo matchmakingRoomInfo, LoginMessage currentPlayer)  {
 
         Optional<PlayerInfo> whitePlayer = matchmakingRoomInfo.getWhitePlayer();
@@ -199,7 +200,7 @@ private PlayerInfo thisOnlinePlayer;
         isOnline=true;
 
     }
-
+//todo add replay constructor
 
     private void updateChatMessages() {
         List<String> chatHistory = null;
@@ -445,14 +446,28 @@ private PlayerInfo thisOnlinePlayer;
         blackTimerTask.cancel();
 
 
+        try {
             RepositoryFactory.getLeaderboardRepository().setLeaderboardResult(leaderboardResult);
+
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("GameWinScreen.fxml"));
         Scene scene = null;
         scene = new Scene(fxmlLoader.load(), 1200, 768);
         GameWinController gameWinController = fxmlLoader.getController();
         gameWinController.setWinner(leaderboardResult);
-        gameWinController.setMoves(turnManager.getMoves());
+        try {
+            gameWinController.setMoves(turnManager.getMoves());
+
+        }
+       catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+e.printStackTrace();
+        }
 
         Stage stage = new Stage();
         stage.initModality(Modality.WINDOW_MODAL);
@@ -560,7 +575,7 @@ a.show();*/
     }
 
 
-    private void movePiece(TileData selectedTile, TileData moveToTile) {
+    protected void movePiece(TileData selectedTile, TileData moveToTile) {
         Position fromPos = selectedTile.getPosition();
         Position moveToPos = moveToTile.getPosition();
         Optional<PlayerMove> move = selectedAvailablePositions.stream().filter(m -> m.getPosition().equals(moveToPos)).findFirst();
@@ -584,10 +599,10 @@ a.show();*/
         }
 
       //  PlayerMove turnMove = new PlayerMove(move.get().getPieceToMove(), move.get().getPosition(), move.get().getMoveJump());
-        turnManager.AddMove(move.get());
-        listViewMovesHistory.getItems().add(move.get().toString());
 
-        //todo infinite bug fix
+            turnManager.addMove(move.get());
+
+        listViewMovesHistory.getItems().add(move.get().toString());
 
 
         PieceData movePieceData = selectedTile.getPiece();
@@ -596,12 +611,12 @@ a.show();*/
             pieceColor = WHITE_PIECE_COLOR;
             //check if should add king
             if (moveToPos.getY() == Y_ROW_SIZE - 1) {
-                movePieceData.setKing();
+                movePieceData.setAsKing();
             }
         } else {
             pieceColor = BLACK_PIECE_COLOR;
             if (moveToPos.getY() == 0) {
-                movePieceData.setKing();
+                movePieceData.setAsKing();
             }
         }
 

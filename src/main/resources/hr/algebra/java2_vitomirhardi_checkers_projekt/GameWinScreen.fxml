@@ -59,7 +59,7 @@
                      <font>
                         <Font size="15.0" />
                      </font></Button>
-                  <Button mnemonicParsing="false" onAction="#ReplayMatchMoves" text="Replay match moves">
+                  <Button mnemonicParsing="false" onAction="#btnReplayMatchMovesAction" text="Replay match moves">
                      <font>
                         <Font size="15.0" />
                      </font>

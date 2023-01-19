@@ -3,6 +3,7 @@ module com.example.java2_vitomirhardi_checkers_projekt {
     requires javafx.fxml;
     requires java.rmi;
     requires java.xml;
+    requires java.logging;
 
 
     opens hr.algebra.java2_vitomirhardi_checkers_projekt to javafx.fxml;

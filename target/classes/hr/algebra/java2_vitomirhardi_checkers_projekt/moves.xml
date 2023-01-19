@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE moves SYSTEM "moves.dtd">
+<moves>
+    <PlayerMove id="0">
+        <xPos>2</xPos>
+        <yPos>3</yPos>
+        <fromPosX>1</fromPosX>
+        <fromPosY>2</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="1">
+        <xPos>1</xPos>
+        <yPos>4</yPos>
+        <fromPosX>0</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="2">
+        <xPos>0</xPos>
+        <yPos>5</yPos>
+        <fromPosX>2</fromPosX>
+        <fromPosY>3</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>1</takenPieceX>
+        <takenPieceY>1</takenPieceY>
+    </PlayerMove>
+</moves>

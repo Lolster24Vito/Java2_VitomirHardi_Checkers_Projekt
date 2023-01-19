@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="hr.algebra.java2_vitomirhardi_checkers_projekt.controllers.MatchReplayController"
-            prefHeight="400.0" prefWidth="600.0">
 
-</AnchorPane>
+<BorderPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.java2_vitomirhardi_checkers_projekt.controllers.MatchReplayController">
+   <center>
+           <GridPane fx:id="gridBoard" alignment="CENTER" gridLinesVisible="true" prefHeight="287.0" prefWidth="457.0" BorderPane.alignment="CENTER">
+
+        </GridPane>
+   </center>
+   <bottom>
+      <FlowPane alignment="CENTER" hgap="50.0" prefHeight="158.0" prefWidth="458.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" onAction="#btnPreviousMoveAction" text="Previous move" />
+            <Button mnemonicParsing="false" onAction="#btnNextMoveAction" text="Next move" />
+         </children>
+      </FlowPane>
+   </bottom>
+</BorderPane>

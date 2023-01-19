@@ -1,8 +1,5 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt.models;
 
-import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.models.Position;
-
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
@@ -31,7 +28,7 @@ public class Piece extends Circle {
     }
 
     public void debugSetKing(){
-        pieceData.setKing();
+        pieceData.setAsKing();
     }
 
     public Piece(double v, Paint paint, Position pos, PlayerColor pieceColor, Boolean isKing) {

@@ -1,12 +1,15 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
 import hr.algebra.java2_vitomirhardi_checkers_projekt.controllers.OnlineGameStartScreenController;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerMove;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlParser;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class HelloApplication extends Application {
     private static Stage mainStage;
@@ -27,6 +30,18 @@ public class HelloApplication extends Application {
 
         stage.setScene(scene);
         stage.show();
+
+       // XmlParser.testSaveDocument();
+        try {
+            Optional<PlayerMove> playerMove = XmlParser.readNextPlayerMove();
+            Optional<PlayerMove> playerMove2 = XmlParser.readNextPlayerMove();
+            System.out.println("Blaa");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+
     }
     public static Stage getMainStage() {
         return mainStage;
