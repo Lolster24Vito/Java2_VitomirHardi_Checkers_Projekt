@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.GridPane?>
 
-
-<BorderPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.java2_vitomirhardi_checkers_projekt.controllers.MatchReplayController">
-   <center>
-           <GridPane fx:id="gridBoard" alignment="CENTER" gridLinesVisible="true" prefHeight="287.0" prefWidth="457.0" BorderPane.alignment="CENTER">
-
-        </GridPane>
-   </center>
+<BorderPane prefHeight="544.0" prefWidth="684.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.java2_vitomirhardi_checkers_projekt.controllers.MatchReplayController">
    <bottom>
       <FlowPane alignment="CENTER" hgap="50.0" prefHeight="158.0" prefWidth="458.0" BorderPane.alignment="CENTER">
          <children>
@@ -20,4 +16,15 @@
          </children>
       </FlowPane>
    </bottom>
+   <center>
+      <TabPane prefHeight="342.0" prefWidth="458.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab text="Untitled Tab 1">
+            <content>
+                <fx:include fx:id="CheckersBoard" source="CheckersBoard.fxml" />
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </center>
 </BorderPane>

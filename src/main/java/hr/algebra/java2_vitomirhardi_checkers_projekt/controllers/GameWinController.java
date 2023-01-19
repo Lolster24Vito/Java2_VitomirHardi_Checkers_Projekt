@@ -100,9 +100,6 @@ if(winner!=null){
 
          */
 
-
-
-
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("MatchReplayScreen.fxml"));
 
         try {

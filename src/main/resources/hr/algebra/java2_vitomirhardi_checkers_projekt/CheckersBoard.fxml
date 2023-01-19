@@ -19,7 +19,7 @@
       </GridPane>
    </center>
    <top>
-      <VBox BorderPane.alignment="CENTER">
+      <VBox fx:id="topPane" BorderPane.alignment="CENTER">
          <children>
             <MenuBar prefHeight="26.0" prefWidth="781.0">
               <menus>
@@ -47,7 +47,7 @@
       </VBox>
    </top>
    <bottom>
-      <FlowPane alignment="CENTER" columnHalignment="CENTER" orientation="VERTICAL" prefHeight="80.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <FlowPane fx:id="bottomPlayerPane" alignment="CENTER" columnHalignment="CENTER" orientation="VERTICAL" prefHeight="80.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
             <Label fx:id="labelPlayerBlackName" alignment="CENTER" contentDisplay="CENTER" text="player2Name" />
             <Label fx:id="labelPlayerBlackScore" alignment="CENTER" text="player2score" />
@@ -63,7 +63,7 @@
       </VBox>
    </right>
    <left>
-      <FlowPane alignment="CENTER" prefHeight="240.0" prefWidth="85.0" BorderPane.alignment="CENTER">
+      <FlowPane fx:id="chatFlowPane" alignment="CENTER" prefHeight="240.0" prefWidth="85.0" BorderPane.alignment="CENTER">
          <children>
             <Label fx:id="labelStatus" text="Status:" />
             <Label text="Player turn:" />

@@ -28,7 +28,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -49,9 +51,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class GameBoardController implements Initializable, MoveReader {
+public class GameBoardController implements Initializable, MoveReader,MatchReplayable {
     @FXML
-    private GridPane gridBoard;
+    public FlowPane chatFlowPane;
+    public VBox topPane;
+    public FlowPane bottomPlayerPane;
+    @FXML
+    protected GridPane gridBoard;
 
     @FXML
     private Label labelPlayerWhiteName;
@@ -80,6 +86,7 @@ public class GameBoardController implements Initializable, MoveReader {
 
 
 private boolean isOnline=false;
+private boolean isReplaying=false;
 private PlayerInfo thisOnlinePlayer;
 
     public static  final double SIDE_SIZE = 70;
@@ -150,14 +157,16 @@ private PlayerInfo thisOnlinePlayer;
     ExecutorService executorService=Executors.newFixedThreadPool(2);
     ChatService stub=null;
     int chatSize=0;
-    public GameBoardController() {
-
-    }
     //Offline local constructor
     public GameBoardController(PlayerInfo whitePlayer,PlayerInfo blackPlayer){
         this.whitePlayer=whitePlayer;
         this.blackPlayer=blackPlayer;
     }
+    public GameBoardController(){
+        isReplaying=true;
+
+    }
+
 
     public void sendMessage(){
         try {
@@ -245,16 +254,33 @@ private PlayerInfo thisOnlinePlayer;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("initialize gameboard");
-        initLabels();
-
         InitPane();
+
+        if(!isReplaying){
+            initLabels();
+            refreshScore();
+
+            whiteTimer.scheduleAtFixedRate(whiteTimerTask, 0, 1000);
+            blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
+            chatMessages= FXCollections.observableArrayList();
+            lvMessages.setItems(chatMessages);
+        }
+        else{
+            chatFlowPane.setVisible(false);
+            chatFlowPane.setDisable(true);
+
+            listViewMovesHistory.setVisible(false);
+            listViewMovesHistory.setDisable(true);
+
+            topPane.setVisible(false);
+            topPane.setDisable(true);
+
+            bottomPlayerPane.setVisible(false);
+            bottomPlayerPane.setDisable(true);
+        }
         allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
         isJumpInTurn = allPlayerAvailablePositions.stream().anyMatch(p -> p.isJump());
-        refreshScore();
-        whiteTimer.scheduleAtFixedRate(whiteTimerTask, 0, 1000);
-        blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
-        chatMessages= FXCollections.observableArrayList();
-        lvMessages.setItems(chatMessages);
+
 
 
     }
@@ -321,7 +347,7 @@ private PlayerInfo thisOnlinePlayer;
     }
 
     private boolean isClickable(PlayerColor color) {
-        return (!isOnline) || (isOnline && thisOnlinePlayer.getColor() == color);
+        return  (!isReplaying)&&((!isOnline) || (isOnline && thisOnlinePlayer.getColor() == color));
     }
 
 
@@ -961,4 +987,48 @@ playerMove.getSelectedTile().setPiece(playerMove.getPieceData());
         });
 
     }
+
+
+    @Override
+    public void replayNextMove(PlayerMove playerMove) {
+
+
+
+
+
+
+       // clickOnPiece(playerMove.getPieceToMove());
+
+        TileData fromTileData = board.tiles[playerMove.getPiecePosition().getX()][playerMove.getPiecePosition().getY()].getTileData();
+        TileData moveToTileData = board.tiles[playerMove.getPosition().getX()][playerMove.getPosition().getY()].getTileData();
+        movePiece(fromTileData,
+               moveToTileData);
+        Position moveToPosition= playerMove.getPosition();
+
+/*
+        //if there's more legal jumps for player dont change
+        Boolean anotherJump = false;
+        if (playerMove.isJump()) {
+            if (board.tiles[moveToPosition.getX()][moveToPosition.getY()].hasPiece()) {
+                ArrayList<PlayerMove> legalJumpsFromNewPos = board.getLegalJumpsFrom(
+                        colorTurn,
+                        board.tiles[moveToPosition.getX()][moveToPosition.getY()].getTileData().getPiece()
+                );
+                if (legalJumpsFromNewPos.size() > 0) {
+                    clearJumpHighlights();
+                    clearSelectedPieceColor();
+                    allPlayerAvailablePositions = legalJumpsFromNewPos;
+                    anotherJump = true;
+                }
+
+            }
+        }
+        if(!anotherJump){
+            changePlayerTurn();
+        }*/
+
+
+
+    }
+
 }
