@@ -33,8 +33,8 @@ public class HelloApplication extends Application {
 
        // XmlParser.testSaveDocument();
         try {
-            Optional<PlayerMove> playerMove = XmlParser.readNextPlayerMove();
-            Optional<PlayerMove> playerMove2 = XmlParser.readNextPlayerMove();
+         //   Optional<PlayerMove> playerMove = XmlParser.readNextPlayerMove();
+         //   Optional<PlayerMove> playerMove2 = XmlParser.readNextPlayerMove();
             System.out.println("Blaa");
         }
         catch (Exception e){

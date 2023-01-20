@@ -1,28 +1,19 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt.controllers;
 
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.MoveXmlElementTypes;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.PlayerMoveXmlData;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlConfiguration;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlParser;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,17 +40,11 @@ public class MatchReplayController   implements Initializable
     private final Color BLACK_PIECE_SELECTED_COLOR = Color.rgb(110, 0, 0);
 
     private int moveCounter=0;
+
     ExecutorService executorService= Executors.newSingleThreadExecutor();
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
-
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        });
+        initPane();
     }
 
     private void initPane() {
@@ -114,9 +99,16 @@ public class MatchReplayController   implements Initializable
     }
 
     public void btnPreviousMoveAction(ActionEvent actionEvent) {
-        moveCounter--;
 
-        XmlParser.readPlayerMove(moveCounter);
+        Optional<PlayerMove> playerMove=Optional.empty();
+        playerMove = XmlParser.readPlayerMove(moveCounter);
+
+
+        removePieceFromTile(new Position(0,1));
+
+        // moveCounter--;
+
+        //XmlParser.readPlayerMove(moveCounter);
         //XmlParser.readPlayerMove(moveCounter);
     }
 
@@ -135,24 +127,96 @@ public class MatchReplayController   implements Initializable
             return;
         }
         if(playerMove.isEmpty())return;
-        handlePiece(playerMove.get());
+        handleNextMovePiece(playerMove.get());
 
 
         //   XmlParser.readNextPlayerMove(moveCounter);
         //XmlParser.readPlayerMoves(moveCounter);
     }
 
-    private void handlePiece(PlayerMove playerMove) {
-    if (playerMove.isJump()){
-        //logic
+    private void handleNextMovePiece(PlayerMove playerMove) {
+        Color color;
+        if(playerMove.getPieceToMove().getPieceColor().equals(PlayerColor.black)){
+            color=BLACK_PIECE_COLOR;
+        }
+        else{
+            color=WHITE_PIECE_COLOR;
+        }
+
+        if(playerMove.isJump()){
+
+            Piece piece = new Piece(PIECE_SIZE, color,new PieceData(playerMove.getPieceToMove()),playerMove.getPosition());
+            addPiece(piece,playerMove);
+            removePieceFromTile(playerMove.getPiecePosition());
+            removePieceFromTile(playerMove.getTakenPiecePosition());
+
+
+        }else {
+            Piece piece = new Piece(PIECE_SIZE, color,new PieceData(playerMove.getPieceToMove()),playerMove.getPosition());
+            addPiece(piece,playerMove);
+           // gridBoard.add(piece, playerMove.getPosition().getX(), playerMove.getPosition().getY());
+           // board.tiles[playerMove.getPosition().getX()][playerMove.getPosition().getY()].setPiece(piece);
+            removePieceFromTile(playerMove.getPiecePosition());
+        }
+
+
     }
-    else{
-        movePiece(playerMove);
+    private void addPiece(Piece piece, PlayerMove playerMove){
+        ObservableList<Node> childrens = gridBoard.getChildren();
+
+            for (Node node : childrens) {
+                if (node instanceof Tile &&
+                        GridPane.getRowIndex(node) == playerMove.getPosition().getY() &&
+                        GridPane.getColumnIndex(node) == playerMove.getPosition().getX()
+                ) {
+                    Platform.runLater(() -> {
+                    Tile fromTile = (Tile) node;
+
+                    piece.setPosition(playerMove.getPosition());
+                    fromTile.setPiece(piece);
+
+                    gridBoard.add(piece, playerMove.getPosition().getX(), playerMove.getPosition().getY());
+
+                    // Piece piece = fromTile.getPiece();
+
+                    //fromTile.setPiece(null);
+                    // moveToTile.setPiece(piece);
+                    //gridBoard.getChildren().remove(piece);
+                    });
+                    break;
+                }
+            }
+            board.tiles[playerMove.getPosition().getX()][playerMove.getPosition().getY()].setPiece(piece);
+          //  board.tiles[ playerMove.getPiecePosition().getX()][playerMove.getPiecePosition().getY()].setPiece(null);
+
+
     }
+    private void removePieceFromTile(Position position) {
+        Platform.runLater(() -> {
+                    ObservableList<Node> childrens = gridBoard.getChildren();
+            for (Node node : childrens) {
+                if (node instanceof Tile &&
+                        GridPane.getRowIndex(node) == position.getY() &&
+                        GridPane.getColumnIndex(node) == position.getX()) {
+
+                        Tile fromTile = (Tile) node;
+                    Piece piece = fromTile.getPiece();
+
+                    boolean removed=gridBoard.getChildren().remove(piece);
+                    System.out.println(removed+" removed");
+
+                    break;
+                }
+            }
+            board.tiles[position.getX()][position.getY()].setPiece(null);
+        });
+
 
     }
 
-    private void movePiece(PlayerMove playerMove) {
+
+
+    /*private void movePiece(PlayerMove playerMove) {
     //    Piece movedPiece = new Piece(PIECE_SIZE, pieceColor, movePieceData, moveToPos);
 
       //  gridBoard.add(movedPiece, moveToPos.getX(), moveToPos.getY());
@@ -171,7 +235,7 @@ public class MatchReplayController   implements Initializable
 
         board.tiles[piecePos.getX()][piecePos.getY()].setPiece(piece);
         gridBoard.add(piece, piecePos.getX(), piecePos.getY());
-    }
+    }*/
     //gridpane klasik sa svim pokretima
     //start reading
     //mice se

@@ -62,16 +62,33 @@ private  static Document createDocument(String elementName) throws ParserConfigu
             document.getDocumentElement().appendChild(moveElement);
 
             moveElement.setAttributeNode(createAttribute(document,"id",String.valueOf(counter)));
+            if(playerMove.isJump()){
 
-            moveElement.appendChild(createElement(document, "xPos",
-                    String.valueOf(playerMove.getPosition().getX())));
-            moveElement.appendChild(createElement(document, "yPos",
-                    String.valueOf(playerMove.getPosition().getY())));
+                //
+                moveElement.appendChild(createElement(document, "xPos",
+                        String.valueOf(playerMove.getPiecePosition().getX())));
+                moveElement.appendChild(createElement(document, "yPos",
+                        String.valueOf(playerMove.getPiecePosition().getY())));
 
-            moveElement.appendChild(createElement(document, "fromPosX",
-                    String.valueOf(playerMove.getPiecePosition().getX())));
-            moveElement.appendChild(createElement(document, "fromPosY",
-                    String.valueOf(playerMove.getPiecePosition().getY())));
+                //
+                moveElement.appendChild(createElement(document, "fromPosX",
+                        String.valueOf(playerMove.getPosition().getX())));
+                //
+                moveElement.appendChild(createElement(document, "fromPosY",
+                        String.valueOf(playerMove.getPosition().getY())));
+            }
+            else{
+                moveElement.appendChild(createElement(document, "xPos",
+                        String.valueOf(playerMove.getPosition().getX())));
+                moveElement.appendChild(createElement(document, "yPos",
+                        String.valueOf(playerMove.getPosition().getY())));
+
+                moveElement.appendChild(createElement(document, "fromPosX",
+                        String.valueOf(playerMove.getPiecePosition().getX())));
+                moveElement.appendChild(createElement(document, "fromPosY",
+                        String.valueOf(playerMove.getPiecePosition().getY())));
+            }
+
 
 
             moveElement.appendChild(createElement(document, "isKing",
@@ -84,7 +101,7 @@ private  static Document createDocument(String elementName) throws ParserConfigu
                 moveElement.appendChild(createElement(document,"takenPieceX",
                         String.valueOf(playerMove.getTakenPiecePosition().getX())) );
                 moveElement.appendChild(createElement(document,"takenPieceY",
-                        String.valueOf(playerMove.getTakenPiecePosition().getX())) );
+                        String.valueOf(playerMove.getTakenPiecePosition().getY())) );
             }
             counter++;
         }
@@ -324,8 +341,8 @@ private  static Document createDocument(String elementName) throws ParserConfigu
                         }
                         else{
                             playerMove=new PlayerMove(
-                                    new PieceData(new Position(playerMoveXmlData.getxPos(), playerMoveXmlData.getyPos()), playerMoveXmlData.isKing(), playerMoveXmlData.getPlayerColor()),
-                                    new Position(playerMoveXmlData.getFromPosX(), playerMoveXmlData.getFromPosY())
+                                    new PieceData(new Position(playerMoveXmlData.getFromPosX(), playerMoveXmlData.getFromPosY()), playerMoveXmlData.isKing(), playerMoveXmlData.getPlayerColor()),
+                                    new Position(playerMoveXmlData.getxPos(), playerMoveXmlData.getyPos())
 
                             );
                         }
@@ -350,7 +367,7 @@ private  static Document createDocument(String elementName) throws ParserConfigu
         return factory.createXMLEventReader(new FileInputStream(XmlConfiguration.XML_FILE), String.valueOf(StandardCharsets.UTF_8));
     }
 
-    public static void readPlayerMove(int moveCounter) {
+    public static Optional<PlayerMove> readPlayerMove(int moveCounter) {
 
     }
 }
