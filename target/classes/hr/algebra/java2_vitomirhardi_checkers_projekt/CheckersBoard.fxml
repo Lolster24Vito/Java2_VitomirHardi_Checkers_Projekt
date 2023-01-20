@@ -38,6 +38,7 @@
             </MenuBar>
             <FlowPane alignment="CENTER" columnHalignment="CENTER" orientation="VERTICAL" prefHeight="90.0" prefWidth="200.0">
                <children>
+                  <Button mnemonicParsing="false" onAction="#btnDebugWinAction" text="btnDebug" />
                   <Label fx:id="labelPlayerWhiteName" alignment="CENTER" contentDisplay="CENTER" text="player2Name" />
                   <Label fx:id="labelPlayerWhiteScore" alignment="CENTER" text="player2score" />
                   <Label fx:id="labelPlayerWhiteTime" alignment="CENTER" text="00:00:00" />

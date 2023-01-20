@@ -1,6 +1,9 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt.xml;
 
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PieceData;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerMove;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.Position;
 
 public class PlayerMoveXmlData {
     String id;
@@ -104,5 +107,23 @@ public class PlayerMoveXmlData {
 
     public void setTakenPieceY(int takenPieceY) {
         this.takenPieceY = takenPieceY;
+    }
+
+    public PlayerMove toPlayerMove(){
+        if (this.isJump()) {
+            return new PlayerMove(
+                    new PieceData(new Position(this.getxPos(), this.getyPos()), this.isKing(), this.getPlayerColor()),
+                    new Position(this.getTakenPieceX(), this.getTakenPieceY()),
+                    new Position(this.getFromPosX(), this.getFromPosY()),
+                    this.isJump()
+            );
+        }
+        else{
+            return new PlayerMove(
+                    new PieceData(new Position(this.getFromPosX(), this.getFromPosY()), this.isKing(), this.getPlayerColor()),
+                    new Position(this.getxPos(), this.getyPos())
+
+            );
+        }
     }
 }

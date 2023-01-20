@@ -296,9 +296,9 @@ private PlayerInfo thisOnlinePlayer;
                 }
                 //4,5
                // if(i==5&&j==4){
-                if(debugBool) {
+                //if(debugBool) {
                     if ((i >= 5) && count % 2 == 1) {
-                        debugBool=false;
+                  //      debugBool=false;
 
                             Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
                         if(isClickable(PlayerColor.black)) {
@@ -309,7 +309,7 @@ private PlayerInfo thisOnlinePlayer;
 
 
                     }
-                }
+              //  }
                 board.tiles[j][i] = tile;
 
                 count++;
@@ -428,7 +428,16 @@ private PlayerInfo thisOnlinePlayer;
         highlightJumps();
 
     }
+public void btnDebugWinAction(){
+    try {
+        playerWin();
+    } catch (IOException e) {
+        e.printStackTrace();
+    } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+    }
 
+}
     private void playerWin() throws IOException, ClassNotFoundException {
 
         LeaderboardResult leaderboardResult;

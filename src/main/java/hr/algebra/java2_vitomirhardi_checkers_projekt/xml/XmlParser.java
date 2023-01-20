@@ -167,13 +167,8 @@ private  static Document createDocument(String elementName) throws ParserConfigu
                            if(id.isPresent()){
                                playerMoveXmlData.setId(id.get());
                            }
-                          /*
 
-                           */
-
-                         //  report.append(attributes.next()).append(" ");
                        }
-                     //  report.append("\n");
                    }
                    try {
                        currentType=MoveXmlElementTypes.valueOf(qName);
@@ -185,25 +180,10 @@ private  static Document createDocument(String elementName) throws ParserConfigu
                }
                case XMLStreamConstants.CHARACTERS:
                    String data = event.asCharacters().getData();
-                   // it collects also String.empty
-                   //get string
-                   switch (currentType) {
 
-                       case xPos -> { playerMoveXmlData.setX(Integer.valueOf(data));
-                       }
-                       case yPos -> {playerMoveXmlData.setY(Integer.valueOf(data));
-                       }
-                       case isKing -> {playerMoveXmlData.setKing(Boolean.valueOf(data));
-                       }
-                       case isJump->{playerMoveXmlData.setJump(Boolean.valueOf(data));}
-                       case PlayerColor -> { playerMoveXmlData.setPlayerColor(PlayerColor.valueOf(data));
-                       }
-                       case takenPieceX -> { playerMoveXmlData.setTakenPieceX(Integer.valueOf(data));
-                       }
-                       case takenPieceY -> {
-                           playerMoveXmlData.setTakenPieceY(Integer.valueOf(data));
-                       }
-                   }
+                   handleReadCharacters(currentType,playerMoveXmlData,data);
+
+
                    if (!data.trim().isEmpty()) {
                        report.append(data);
                    }
@@ -274,9 +254,7 @@ private  static Document createDocument(String elementName) throws ParserConfigu
                     String qName = startElement.getName().getLocalPart();
                     //switch qName
                     Iterator attributes = startElement.getAttributes();
-//if has correct count
                     if (attributes.hasNext()) {
-                        report.append("Attributes: ");
                         while (attributes.hasNext()) {
 
                             Attribute attribute= (Attribute) attributes.next();
@@ -284,6 +262,7 @@ private  static Document createDocument(String elementName) throws ParserConfigu
                                 if(id.isPresent()){
                                     //continue as normal
                                     playerMoveXmlData.setId(id.get());
+                                    System.out.println("ID IS:"+id.get());
                                 }
 
 
@@ -303,26 +282,8 @@ private  static Document createDocument(String elementName) throws ParserConfigu
                     String data = event.asCharacters().getData();
                     // it collects also String.empty
                     //get string
-                    switch (currentType) {
-
-                        case xPos -> { playerMoveXmlData.setX(Integer.valueOf(data));
-                        }
-                        case yPos -> {playerMoveXmlData.setY(Integer.valueOf(data));
-                        }
-                        case isKing -> {playerMoveXmlData.setKing(Boolean.valueOf(data));
-                        }
-                        case isJump->{playerMoveXmlData.setJump(Boolean.valueOf(data));}
-                        case fromPosX -> {playerMoveXmlData.setFromPosX(Integer.valueOf(data));}
-                        case fromPosY -> {playerMoveXmlData.setFromPosY(Integer.valueOf(data));}
-
-                        case PlayerColor -> { playerMoveXmlData.setPlayerColor(PlayerColor.valueOf(data));
-                        }
-                        case takenPieceX -> { playerMoveXmlData.setTakenPieceX(Integer.valueOf(data));
-                        }
-                        case takenPieceY -> {
-                            playerMoveXmlData.setTakenPieceY(Integer.valueOf(data));
-                        }
-                    }
+                   // handleReadCharacters(currentType,playerMoveXmlData,data);
+                    handleReadCharacters(currentType, playerMoveXmlData, data);
                     if (!data.trim().isEmpty()) {
                         report.append(data);
                     }
@@ -331,21 +292,8 @@ private  static Document createDocument(String elementName) throws ParserConfigu
                     EndElement endElement = event.asEndElement();
                     if(endElement.getName().getLocalPart()=="PlayerMove") {
                         PlayerMove playerMove;
-                        if (playerMoveXmlData.isJump()) {
-                            playerMove = new PlayerMove(
-                                    new PieceData(new Position(playerMoveXmlData.getxPos(), playerMoveXmlData.getyPos()), playerMoveXmlData.isKing(), playerMoveXmlData.getPlayerColor()),
-                                    new Position(playerMoveXmlData.getTakenPieceX(), playerMoveXmlData.getTakenPieceY()),
-                                    new Position(playerMoveXmlData.getFromPosX(), playerMoveXmlData.getFromPosY()),
-                                    playerMoveXmlData.isJump()
-                            );
-                        }
-                        else{
-                            playerMove=new PlayerMove(
-                                    new PieceData(new Position(playerMoveXmlData.getFromPosX(), playerMoveXmlData.getFromPosY()), playerMoveXmlData.isKing(), playerMoveXmlData.getPlayerColor()),
-                                    new Position(playerMoveXmlData.getxPos(), playerMoveXmlData.getyPos())
+                       playerMove=playerMoveXmlData.toPlayerMove();
 
-                            );
-                        }
                         return Optional.of(playerMove);
                     }
 
@@ -363,11 +311,109 @@ private  static Document createDocument(String elementName) throws ParserConfigu
         return Optional.empty();
     }
 
+    private static void handleReadCharacters(MoveXmlElementTypes currentType, PlayerMoveXmlData playerMoveXmlData, String data) {
+        switch (currentType) {
+
+            case xPos -> { playerMoveXmlData.setX(Integer.valueOf(data));
+            }
+            case yPos -> {
+                playerMoveXmlData.setY(Integer.valueOf(data));
+            }
+            case isKing -> {
+                playerMoveXmlData.setKing(Boolean.valueOf(data));
+            }
+            case isJump->{
+                playerMoveXmlData.setJump(Boolean.valueOf(data));}
+            case fromPosX -> {
+                playerMoveXmlData.setFromPosX(Integer.valueOf(data));}
+            case fromPosY -> {
+                playerMoveXmlData.setFromPosY(Integer.valueOf(data));}
+
+            case PlayerColor -> { playerMoveXmlData.setPlayerColor(PlayerColor.valueOf(data));
+            }
+            case takenPieceX -> { playerMoveXmlData.setTakenPieceX(Integer.valueOf(data));
+            }
+            case takenPieceY -> {
+                playerMoveXmlData.setTakenPieceY(Integer.valueOf(data));
+            }
+        }
+    }
+
     private static XMLEventReader createEventReadXML(XMLInputFactory factory) throws XMLStreamException, FileNotFoundException {
         return factory.createXMLEventReader(new FileInputStream(XmlConfiguration.XML_FILE), String.valueOf(StandardCharsets.UTF_8));
     }
+    private static int currentMoveCounter=0;
 
-    public static Optional<PlayerMove> readPlayerMove(int moveCounter) {
+    public static Optional<PlayerMove> readPlayerMove(int moveCounter) throws XMLStreamException, FileNotFoundException {
+        XMLInputFactory factory = XMLInputFactory.newFactory();
+        if(moveCounter!=currentMoveCounter||nextReader==null)
+            nextReader = createEventReadXML(factory);
+        MoveXmlElementTypes currentType=MoveXmlElementTypes.none;
+        PlayerMoveXmlData playerMoveXmlData=new PlayerMoveXmlData();
+        boolean isThisElement=false;
+        while (nextReader.hasNext()) {
+            XMLEvent event = nextReader.nextEvent();
+            switch (event.getEventType()) {
+                case XMLStreamConstants.START_ELEMENT: {
+                    // if brackets used -> variables have restricted scope -> Vuk Vojta
+                    StartElement startElement = event.asStartElement();
+                    String qName = startElement.getName().getLocalPart();
+                    //switch qName
+                    Iterator attributes = startElement.getAttributes();
+                    if (attributes.hasNext()) {
+                        while (attributes.hasNext()) {
+
+                            Attribute attribute= (Attribute) attributes.next();
+                            Optional<String> id=getAttributeId(attribute);
+                            if(id.isPresent()&&id.get().equals(String.valueOf(moveCounter))){
+                                //continue as normal
+                                isThisElement=true;
+                                playerMoveXmlData.setId(id.get());
+                                currentMoveCounter=Integer.parseInt(id.get())+1;
+
+                            }
+
+
+                        }
+                    }
+                    try {
+                        currentType=MoveXmlElementTypes.valueOf(qName);
+                    }
+                    catch (Exception e){
+                        continue;
+                    }
+                    break;
+                }
+                case XMLStreamConstants.CHARACTERS:
+                    String data = event.asCharacters().getData();
+                    // it collects also String.empty
+                    //get string
+                    // handleReadCharacters(currentType,playerMoveXmlData,data);
+                    if(isThisElement) {
+                        handleReadCharacters(currentType, playerMoveXmlData, data);
+                    }
+                    break;
+                case XMLStreamConstants.END_ELEMENT:
+                    EndElement endElement = event.asEndElement();
+                    if(endElement.getName().getLocalPart()=="PlayerMove") {
+                        if(isThisElement) {
+                            PlayerMove playerMove = playerMoveXmlData.toPlayerMove();
+
+
+                            return Optional.of(playerMove);
+                        }
+                    }
+
+                    currentType=MoveXmlElementTypes.none;
+                    break;
+                case XMLStreamConstants.END_DOCUMENT:
+                    break;
+            }
+
+        }
+
+
+        return Optional.empty();
 
     }
 }
