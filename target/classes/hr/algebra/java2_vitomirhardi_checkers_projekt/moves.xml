@@ -10,4 +10,283 @@
         <PlayerColor>white</PlayerColor>
         <isJump>false</isJump>
     </PlayerMove>
+    <PlayerMove id="1">
+        <xPos>3</xPos>
+        <yPos>4</yPos>
+        <fromPosX>4</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="2">
+        <xPos>2</xPos>
+        <yPos>3</yPos>
+        <fromPosX>4</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>3</takenPieceX>
+        <takenPieceY>4</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="3">
+        <xPos>5</xPos>
+        <yPos>6</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>4</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>4</takenPieceX>
+        <takenPieceY>5</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="4">
+        <xPos>2</xPos>
+        <yPos>3</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>2</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="5">
+        <xPos>3</xPos>
+        <yPos>4</yPos>
+        <fromPosX>1</fromPosX>
+        <fromPosY>2</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>2</takenPieceX>
+        <takenPieceY>3</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="6">
+        <xPos>2</xPos>
+        <yPos>1</yPos>
+        <fromPosX>0</fromPosX>
+        <fromPosY>3</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>1</takenPieceX>
+        <takenPieceY>2</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="7">
+        <xPos>3</xPos>
+        <yPos>4</yPos>
+        <fromPosX>2</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="8">
+        <xPos>1</xPos>
+        <yPos>2</yPos>
+        <fromPosX>0</fromPosX>
+        <fromPosY>1</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="9">
+        <xPos>2</xPos>
+        <yPos>3</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>4</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="10">
+        <xPos>1</xPos>
+        <yPos>2</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>4</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>2</takenPieceX>
+        <takenPieceY>3</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="11">
+        <xPos>2</xPos>
+        <yPos>5</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>6</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="12">
+        <xPos>4</xPos>
+        <yPos>5</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>4</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="13">
+        <xPos>3</xPos>
+        <yPos>4</yPos>
+        <fromPosX>2</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="14">
+        <xPos>3</xPos>
+        <yPos>6</yPos>
+        <fromPosX>4</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="15">
+        <xPos>2</xPos>
+        <yPos>7</yPos>
+        <fromPosX>4</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>3</takenPieceX>
+        <takenPieceY>6</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="16">
+        <xPos>1</xPos>
+        <yPos>4</yPos>
+        <fromPosX>0</fromPosX>
+        <fromPosY>3</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="17">
+        <xPos>0</xPos>
+        <yPos>5</yPos>
+        <fromPosX>2</fromPosX>
+        <fromPosY>3</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>1</takenPieceX>
+        <takenPieceY>4</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="18">
+        <xPos>2</xPos>
+        <yPos>1</yPos>
+        <fromPosX>1</fromPosX>
+        <fromPosY>0</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="19">
+        <xPos>1</xPos>
+        <yPos>2</yPos>
+        <fromPosX>2</fromPosX>
+        <fromPosY>3</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="20">
+        <xPos>2</xPos>
+        <yPos>1</yPos>
+        <fromPosX>0</fromPosX>
+        <fromPosY>3</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>1</takenPieceX>
+        <takenPieceY>2</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="21">
+        <xPos>2</xPos>
+        <yPos>3</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>4</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="22">
+        <xPos>2</xPos>
+        <yPos>1</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>0</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="23">
+        <xPos>1</xPos>
+        <yPos>2</yPos>
+        <fromPosX>2</fromPosX>
+        <fromPosY>3</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="24">
+        <xPos>3</xPos>
+        <yPos>2</yPos>
+        <fromPosX>2</fromPosX>
+        <fromPosY>1</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="25">
+        <xPos>0</xPos>
+        <yPos>1</yPos>
+        <fromPosX>1</fromPosX>
+        <fromPosY>2</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="26">
+        <xPos>2</xPos>
+        <yPos>3</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>2</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="27">
+        <xPos>1</xPos>
+        <yPos>0</yPos>
+        <fromPosX>0</fromPosX>
+        <fromPosY>1</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="28">
+        <xPos>4</xPos>
+        <yPos>3</yPos>
+        <fromPosX>5</fromPosX>
+        <fromPosY>2</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="29">
+        <xPos>1</xPos>
+        <yPos>0</yPos>
+        <fromPosX>5</fromPosX>
+        <fromPosY>4</fromPosY>
+        <isKing>true</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>4</takenPieceX>
+        <takenPieceY>3</takenPieceY>
+    </PlayerMove>
 </moves>

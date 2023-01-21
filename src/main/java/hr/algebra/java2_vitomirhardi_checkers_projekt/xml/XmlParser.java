@@ -3,6 +3,7 @@ package hr.algebra.java2_vitomirhardi_checkers_projekt.xml;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.HelloApplication;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
 import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,19 +41,24 @@ public class XmlParser
     DocumentType documentType=domImplementation.createDocumentType("DOCTYPE",null,"moves.dtd");
     return domImplementation.createDocument(null, elementName, documentType);
 }
+
     private static Document movesDocument;
     private  static  int MoveSaveCounter=0;
-    public static void writePlayerMove(PlayerMove playerMove) throws ParserConfigurationException {
+    public static void writePlayerMove(PlayerMove playerMove) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+        File xmlFile = new File(getFilePath(XmlConfiguration.FILENAME));
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
         if(movesDocument==null){
             movesDocument=createDocument("moves");
         }
-        saveMoveToDocument(movesDocument,MoveSaveCounter,playerMove);
-        MoveSaveCounter++;
+            saveMoveToDocument(movesDocument,MoveSaveCounter,playerMove);
+            MoveSaveCounter++;
+            saveDocument(movesDocument,XmlConfiguration.FILENAME);
+
+
     }
     public  static  void writePlayerMoves(List<PlayerMove> playerMoves) throws TransformerException, ParserConfigurationException {
         Document document=createDocument("moves");
-
-
         int counter=0;
         for (PlayerMove playerMove:playerMoves
              ) {
@@ -112,24 +118,16 @@ public class XmlParser
         Transformer transformer = factory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
-        String filePath = HelloApplication.class.getResource("").getPath() +  fileName;
+        String filePath = getFilePath(fileName);
 //normal
         transformer.transform(new DOMSource(document), new StreamResult(new File(filePath)));
     }
-    private  static  void saveDocumentAtEnd(Document document, String fileName) throws TransformerException, IOException {
-    TransformerFactory factory = TransformerFactory.newInstance();
-    Transformer transformer = factory.newTransformer();
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
-    String filePath = HelloApplication.class.getResource("").getPath() +  fileName;
-    File file=new File(filePath);
-        if(file.exists() && !file.isDirectory()) {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
-            transformer.transform(new DOMSource(document), new StreamResult(bw));
-        } else {
-            transformer.transform(new DOMSource(document), new StreamResult(new File(filePath)));
-        }
+
+    private static String getFilePath(String fileName) {
+        return HelloApplication.class.getResource("").getPath() + fileName;
     }
+
+
 
 
 

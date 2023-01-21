@@ -4,8 +4,7 @@ package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerMove;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.Thread.ReadXmlThread;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.Thread.WriteXmlThread;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlConfiguration;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.Thread.WriteXmlMoveThread;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,9 @@ public class TurnManager {
 
     public synchronized void addMove(PlayerMove move){
         moves.add(move);
-        executorService.execute(new WriteXmlThread(moves));
+        //executorService.execute(new WriteXmlThread(moves));
+        executorService.execute(new WriteXmlMoveThread(move));
+
     }
     public TurnManager(){
         executorService = Executors.newCachedThreadPool();

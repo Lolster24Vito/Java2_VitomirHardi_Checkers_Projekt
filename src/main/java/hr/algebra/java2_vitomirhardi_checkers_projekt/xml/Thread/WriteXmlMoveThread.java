@@ -4,16 +4,14 @@ import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerMove;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlConfiguration;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlParser;
 
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class WriteXmlThread implements Runnable {
+public class WriteXmlMoveThread  implements Runnable {
+    private PlayerMove playerMove;
 
-    private List<PlayerMove> playerMoves;
-
-    public WriteXmlThread(List<PlayerMove> playerMoves) {
-        this.playerMoves = playerMoves;
+    public WriteXmlMoveThread(PlayerMove playerMoves) {
+        this.playerMove = playerMoves;
     }
 
     @Override
@@ -31,9 +29,9 @@ public class WriteXmlThread implements Runnable {
             }
             XmlConfiguration.isWriting = true;
             try {
-                XmlParser.writePlayerMoves(playerMoves);
+                XmlParser.writePlayerMove(playerMove);
             } catch (Exception e) {
-                Logger.getLogger(WriteXmlThread.class.getName()).log(
+                Logger.getLogger(WriteXmlMovesThread.class.getName()).log(
                         Level.SEVERE, null, e);
             }
             //Write to document
