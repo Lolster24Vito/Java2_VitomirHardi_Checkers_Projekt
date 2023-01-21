@@ -3,11 +3,13 @@ package hr.algebra.java2_vitomirhardi_checkers_projekt.controllers;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlParser;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
@@ -20,6 +22,8 @@ import java.util.concurrent.Executors;
 
 public class MatchReplayController   implements Initializable
 {
+    @FXML private ListView lvMoves;
+
     @FXML
     private GridPane gridBoard;
 
@@ -44,8 +48,11 @@ public class MatchReplayController   implements Initializable
     private Stack <PieceData> jumpRemovedPieces =new Stack<>();
 
     ExecutorService executorService= Executors.newSingleThreadExecutor();
+    private ObservableList<String> movesObservableList;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        movesObservableList= FXCollections.observableArrayList();
+        lvMoves.setItems(movesObservableList);
         initPane();
     }
 
@@ -101,13 +108,12 @@ public class MatchReplayController   implements Initializable
     }
 
     public void btnPreviousMoveAction(ActionEvent actionEvent) {
-
         Optional<PlayerMove> playerMove=Optional.empty();
         System.out.println(moveCounter+"Prev");
         try {
-
             moveCounter--;
             playerMove = XmlParser.readPlayerMove(moveCounter);
+            movesObservableList.remove(movesObservableList.size()-1);
         } catch (XMLStreamException | FileNotFoundException e) {
             moveCounter++;
             e.printStackTrace();
@@ -129,6 +135,8 @@ public class MatchReplayController   implements Initializable
         try {
             playerMove = XmlParser.readPlayerMove(moveCounter);
             moveCounter++;
+            movesObservableList.add(playerMove.get().toString());
+           // movesObservableList.add(playerMove.get());
 
         } catch (FileNotFoundException |XMLStreamException e) {
             e.printStackTrace();

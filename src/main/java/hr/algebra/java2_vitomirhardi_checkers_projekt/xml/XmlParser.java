@@ -21,9 +21,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,81 +30,81 @@ import java.util.Optional;
 
 public class XmlParser
 {
-private  static Document createDocument(String elementName) throws ParserConfigurationException {
+    private static XMLEventReader nextReader;
+
+
+    private  static Document createDocument(String elementName) throws ParserConfigurationException {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder = factory.newDocumentBuilder();
     DOMImplementation domImplementation=builder.getDOMImplementation();
     DocumentType documentType=domImplementation.createDocumentType("DOCTYPE",null,"moves.dtd");
     return domImplementation.createDocument(null, elementName, documentType);
 }
-    public static void testSaveDocument(){
-    try{
-
-
-        List<PlayerMove> playerMoves=new ArrayList<>();
-        //PlayerMove playerMove1 = readNextPlayerMove();
-     //   PlayerMove playerMove2 = readNextPlayerMove();
-        System.out.println("done");
+    private static Document movesDocument;
+    private  static  int MoveSaveCounter=0;
+    public static void writePlayerMove(PlayerMove playerMove) throws ParserConfigurationException {
+        if(movesDocument==null){
+            movesDocument=createDocument("moves");
         }
-    catch (Exception e) {
-        e.printStackTrace();
-    }
+        saveMoveToDocument(movesDocument,MoveSaveCounter,playerMove);
+        MoveSaveCounter++;
     }
     public  static  void writePlayerMoves(List<PlayerMove> playerMoves) throws TransformerException, ParserConfigurationException {
         Document document=createDocument("moves");
 
+
         int counter=0;
         for (PlayerMove playerMove:playerMoves
              ) {
-            Element moveElement=document.createElement("PlayerMove");
-            document.getDocumentElement().appendChild(moveElement);
-
-            moveElement.setAttributeNode(createAttribute(document,"id",String.valueOf(counter)));
-            if(playerMove.isJump()){
-
-                //
-                moveElement.appendChild(createElement(document, "xPos",
-                        String.valueOf(playerMove.getPiecePosition().getX())));
-                moveElement.appendChild(createElement(document, "yPos",
-                        String.valueOf(playerMove.getPiecePosition().getY())));
-
-                //
-                moveElement.appendChild(createElement(document, "fromPosX",
-                        String.valueOf(playerMove.getPosition().getX())));
-                //
-                moveElement.appendChild(createElement(document, "fromPosY",
-                        String.valueOf(playerMove.getPosition().getY())));
-            }
-            else{
-                moveElement.appendChild(createElement(document, "xPos",
-                        String.valueOf(playerMove.getPosition().getX())));
-                moveElement.appendChild(createElement(document, "yPos",
-                        String.valueOf(playerMove.getPosition().getY())));
-
-                moveElement.appendChild(createElement(document, "fromPosX",
-                        String.valueOf(playerMove.getPiecePosition().getX())));
-                moveElement.appendChild(createElement(document, "fromPosY",
-                        String.valueOf(playerMove.getPiecePosition().getY())));
-            }
-
-
-
-            moveElement.appendChild(createElement(document, "isKing",
-                    String.valueOf(playerMove.getPieceToMove().getIsKing())));
-            moveElement.appendChild(createElement(document, "PlayerColor",
-                    String.valueOf(playerMove.getPieceToMove().getPieceColor())));
-            moveElement.appendChild(createElement(document, "isJump",
-                    String.valueOf(playerMove.getMoveJump())));
-            if(playerMove.isJump()){
-                moveElement.appendChild(createElement(document,"takenPieceX",
-                        String.valueOf(playerMove.getTakenPiecePosition().getX())) );
-                moveElement.appendChild(createElement(document,"takenPieceY",
-                        String.valueOf(playerMove.getTakenPiecePosition().getY())) );
-            }
+            saveMoveToDocument(document, counter, playerMove);
             counter++;
         }
 
-        saveDocument(document,XmlConfiguration.FILENAME);
+
+            saveDocument(document,XmlConfiguration.FILENAME);
+
+    }
+
+    private static void saveMoveToDocument(Document document, int counter, PlayerMove playerMove) {
+        Element moveElement= document.createElement("PlayerMove");
+        document.getDocumentElement().appendChild(moveElement);
+
+        moveElement.setAttributeNode(createAttribute(document,"id",String.valueOf(counter)));
+        if(playerMove.isJump()){
+            moveElement.appendChild(createElement(document, "xPos",
+                    String.valueOf(playerMove.getPiecePosition().getX())));
+            moveElement.appendChild(createElement(document, "yPos",
+                    String.valueOf(playerMove.getPiecePosition().getY())));
+            moveElement.appendChild(createElement(document, "fromPosX",
+                    String.valueOf(playerMove.getPosition().getX())));
+            moveElement.appendChild(createElement(document, "fromPosY",
+                    String.valueOf(playerMove.getPosition().getY())));
+        }
+        else{
+            moveElement.appendChild(createElement(document, "xPos",
+                    String.valueOf(playerMove.getPosition().getX())));
+            moveElement.appendChild(createElement(document, "yPos",
+                    String.valueOf(playerMove.getPosition().getY())));
+
+            moveElement.appendChild(createElement(document, "fromPosX",
+                    String.valueOf(playerMove.getPiecePosition().getX())));
+            moveElement.appendChild(createElement(document, "fromPosY",
+                    String.valueOf(playerMove.getPiecePosition().getY())));
+        }
+
+
+        moveElement.appendChild(createElement(document, "isKing",
+                String.valueOf(playerMove.getPieceToMove().getIsKing())));
+        moveElement.appendChild(createElement(document, "PlayerColor",
+                String.valueOf(playerMove.getPieceToMove().getPieceColor())));
+        moveElement.appendChild(createElement(document, "isJump",
+                String.valueOf(playerMove.getMoveJump())));
+        if(playerMove.isJump()){
+            moveElement.appendChild(createElement(document,"takenPieceX",
+                    String.valueOf(playerMove.getTakenPiecePosition().getX())) );
+            moveElement.appendChild(createElement(document,"takenPieceY",
+                    String.valueOf(playerMove.getTakenPiecePosition().getY())) );
+        }
     }
 
     private static void saveDocument(Document document, String fileName) throws TransformerException {
@@ -114,13 +112,26 @@ private  static Document createDocument(String elementName) throws ParserConfigu
         Transformer transformer = factory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
-        //transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-        //transformer.transform(new DOMSource(document), new StreamResult(System.out));
         String filePath = HelloApplication.class.getResource("").getPath() +  fileName;
-        //todo add
+//normal
         transformer.transform(new DOMSource(document), new StreamResult(new File(filePath)));
     }
+    private  static  void saveDocumentAtEnd(Document document, String fileName) throws TransformerException, IOException {
+    TransformerFactory factory = TransformerFactory.newInstance();
+    Transformer transformer = factory.newTransformer();
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
+    String filePath = HelloApplication.class.getResource("").getPath() +  fileName;
+    File file=new File(filePath);
+        if(file.exists() && !file.isDirectory()) {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+            transformer.transform(new DOMSource(document), new StreamResult(bw));
+        } else {
+            transformer.transform(new DOMSource(document), new StreamResult(new File(filePath)));
+        }
+    }
+
+
 
     private static Attr createAttribute(Document document, String name, String value) {
 
@@ -236,80 +247,7 @@ private  static Document createDocument(String elementName) throws ParserConfigu
     }
 
 
-    private static XMLEventReader nextReader;
-    public static Optional<PlayerMove> readNextPlayerMove() throws FileNotFoundException, XMLStreamException {
-        XMLInputFactory factory = XMLInputFactory.newFactory();
-        if(nextReader==null)
-         nextReader = createEventReadXML(factory);
-        StringBuilder report = new StringBuilder();
-        MoveXmlElementTypes currentType=MoveXmlElementTypes.none;
-        PlayerMoveXmlData playerMoveXmlData=new PlayerMoveXmlData();
-        boolean foundElement=false;
-        while (nextReader.hasNext()) {
-            XMLEvent event = nextReader.nextEvent();
-            switch (event.getEventType()) {
-                case XMLStreamConstants.START_ELEMENT: {
-                    // if brackets used -> variables have restricted scope -> Vuk Vojta
-                    StartElement startElement = event.asStartElement();
-                    String qName = startElement.getName().getLocalPart();
-                    //switch qName
-                    Iterator attributes = startElement.getAttributes();
-                    if (attributes.hasNext()) {
-                        while (attributes.hasNext()) {
 
-                            Attribute attribute= (Attribute) attributes.next();
-                            Optional<String> id=getAttributeId(attribute);
-                                if(id.isPresent()){
-                                    //continue as normal
-                                    playerMoveXmlData.setId(id.get());
-                                    System.out.println("ID IS:"+id.get());
-                                }
-
-
-                          //  report.append(attributes.next()).append(" ");
-                        }
-                        //  report.append("\n");
-                    }
-                    try {
-                        currentType=MoveXmlElementTypes.valueOf(qName);
-                    }
-                    catch (Exception e){
-                        continue;
-                    }
-                    break;
-                }
-                case XMLStreamConstants.CHARACTERS:
-                    String data = event.asCharacters().getData();
-                    // it collects also String.empty
-                    //get string
-                   // handleReadCharacters(currentType,playerMoveXmlData,data);
-                    handleReadCharacters(currentType, playerMoveXmlData, data);
-                    if (!data.trim().isEmpty()) {
-                        report.append(data);
-                    }
-                    break;
-                case XMLStreamConstants.END_ELEMENT:
-                    EndElement endElement = event.asEndElement();
-                    if(endElement.getName().getLocalPart()=="PlayerMove") {
-                        PlayerMove playerMove;
-                       playerMove=playerMoveXmlData.toPlayerMove();
-
-                        return Optional.of(playerMove);
-                    }
-
-                    currentType=MoveXmlElementTypes.none;
-                    break;
-                case XMLStreamConstants.END_DOCUMENT:
-                    report.append("Document ended");
-                    break;
-            }
-
-        }
-
-        System.out.println(report);
-
-        return Optional.empty();
-    }
 
     private static void handleReadCharacters(MoveXmlElementTypes currentType, PlayerMoveXmlData playerMoveXmlData, String data) {
         switch (currentType) {
