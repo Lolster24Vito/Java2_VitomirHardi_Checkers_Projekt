@@ -1,11 +1,12 @@
 package hr.algebra.java2_vitomirhardi_checkers_projekt;
 
 import hr.algebra.Utils.TimerUtils;
-import hr.algebra.jave2_vitomirhardi_checkers_projekt.models.PlayerColor;
+import hr.algebra.java2_vitomirhardi_checkers_projekt.models.PlayerColor;
 
 import java.io.Serializable;
 
 public class LeaderboardResult implements Serializable {
+    private static final long serialVersionUID = 7547777592160616069L;
     //this is not in models because tableview throws Illegal Access exception in the GameLeadeboardController
     private  String winnerName="";
     private long playerMatchTime;
@@ -15,7 +16,6 @@ public class LeaderboardResult implements Serializable {
 
     private long score;
     private PlayerColor color;
-    //private string color
 public  LeaderboardResult(){}
 
 

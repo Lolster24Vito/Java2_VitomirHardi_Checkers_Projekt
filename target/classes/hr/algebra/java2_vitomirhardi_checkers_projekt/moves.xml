@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE moves SYSTEM "moves.dtd">
+<moves>
+    <PlayerMove id="0">
+        <xPos>4</xPos>
+        <yPos>3</yPos>
+        <fromPosX>3</fromPosX>
+        <fromPosY>2</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="1">
+        <xPos>5</xPos>
+        <yPos>4</yPos>
+        <fromPosX>6</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+    <PlayerMove id="2">
+        <xPos>4</xPos>
+        <yPos>3</yPos>
+        <fromPosX>6</fromPosX>
+        <fromPosY>5</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>5</takenPieceX>
+        <takenPieceY>4</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="3">
+        <xPos>5</xPos>
+        <yPos>6</yPos>
+        <fromPosX>7</fromPosX>
+        <fromPosY>4</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>black</PlayerColor>
+        <isJump>true</isJump>
+        <takenPieceX>6</takenPieceX>
+        <takenPieceY>5</takenPieceY>
+    </PlayerMove>
+    <PlayerMove id="4">
+        <xPos>6</xPos>
+        <yPos>3</yPos>
+        <fromPosX>5</fromPosX>
+        <fromPosY>2</fromPosY>
+        <isKing>false</isKing>
+        <PlayerColor>white</PlayerColor>
+        <isJump>false</isJump>
+    </PlayerMove>
+</moves>
