@@ -69,6 +69,7 @@ public class PlayerConnection implements Runnable {
                 moveReader.madeMove(playerMoveSerializable);
             } catch (Exception e) {
                 System.out.println("errorr ReadObject");
+                closeConnection();
             }
         }
     }

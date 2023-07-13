@@ -30,14 +30,6 @@ public class ReflectionUtils {
 classInfo.append("</div>\n");
         classInfo.append("</br></br>");
 
-
-        /*appendModifiers(clazz, classInfo);
-        // we can't find imports because the compiler doesn't put them into the object file
-        // import is just a shorthand to the compiler appendModifiers(clazz, classInfo);
-        classInfo.append(" ").append(clazz.getName());
-        appendParent(clazz, classInfo, true);
-        appendInterfaces(clazz, classInfo);
-        appendConstructors(clazz,classInfo);*/
     }
 
     private static void readClassHeader(Class<?> clazz,StringBuilder classInfo){
@@ -52,30 +44,7 @@ classInfo.append("</div>\n");
 
     }
 
-    private static void appendModifiers(Class<?> clazz, StringBuilder classInfo) {
-//        public static final int PUBLIC           = 0x00000001; // 0001
-//        public static final int PRIVATE          = 0x00000002; // 0010
-//        public static final int PROTECTED        = 0x00000004; // 0100
-//        public static boolean isPublic(int mod) {
-//            return (mod & PUBLIC) != 0;
-//        }
 
-        /*
-        int modifiers = clazz.getModifiers();
-        if (Modifier.isPublic(modifiers)) {
-            System.out.println(clazz.getName() + " is public");
-        }
-        if (Modifier.isAbstract(modifiers)) {
-            System.out.println(clazz.getName() + " is abstract");
-        }
-        if (Modifier.isFinal(modifiers)) {
-            System.out.println(clazz.getName() + " is final");
-        }
-        */
-        // you may think of encapsulating this in an enum, but it is already done:
-        classInfo.append(Modifier.toString(clazz.getModifiers()));
-        classInfo.append(" ");
-    }
 
     private static void appendParent(Class<?> clazz, StringBuilder classInfo, boolean first) {
         Class<?> parent = clazz.getSuperclass();
@@ -114,7 +83,6 @@ classInfo.append("</div>\n");
     }
 
     private static void appendFields(Class<?> clazz, StringBuilder classAndMembersInfo) {
-        //Field[] fields = clazz.getFields();
         boolean firstLoop=true;
         Field[] fields = clazz.getDeclaredFields();
         for (Field field:fields){
@@ -125,21 +93,10 @@ classInfo.append("</div>\n");
             }
              HtmlStringUtils.wrapInTags("<li>",Modifier.toString(field.getModifiers())+" "+field.getType().getSimpleName()+" "+field.getName(),"</li>",classAndMembersInfo);
 
-//code before class
-            // HtmlStringUtils.wrapInTags("<li>",field.toString(),"</li>",classAndMembersInfo);
-
         }
         if(!firstLoop)
             classAndMembersInfo.append("</ul><hr>");
-/*
-        classAndMembersInfo
-                .append(System.lineSeparator())
-                .append(System.lineSeparator())
-                .append(
-                Arrays.stream(fields)
-                        .map(Objects::toString)
-                        .collect(Collectors.joining("\n"))
-        );*/
+
     }
 
     private static void appendMethods(Class<?> clazz, StringBuilder classAndMembersInfo) {
@@ -168,9 +125,7 @@ classInfo.append("</div>\n");
             classAndMembersInfo.append("</ul><hr>");
     }
     private static void appendAnnotations(Executable executable, StringBuilder classAndMembersInfo) {
-/*        for (Annotation annotation : executable.getAnnotations()) {
-        }
-*/
+
 
         classAndMembersInfo.append(
                 Arrays.stream(executable.getAnnotations())
@@ -191,13 +146,6 @@ classInfo.append("</div>\n");
 
         }
         classAndMembersInfo.append(")");
-
-/* before class code
-        classAndMembersInfo.append(
-                Arrays.stream(executable.getParameters())
-                        .map(Objects::toString)
-                        .collect(Collectors.joining(", ", "(", ")"))
-        );*/
     }
     private static void appendExceptions(Executable executable, StringBuilder classAndMembersInfo) {
         if (executable.getExceptionTypes().length > 0) {

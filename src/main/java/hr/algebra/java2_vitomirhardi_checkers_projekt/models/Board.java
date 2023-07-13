@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class Board {
-    //tile zamjeniti sa tileInfo
+
     public Board(int x_row_size, int y_column_size) {
         X_ROW_SIZE = x_row_size;
         Y_COLUMN_SIZE = y_column_size;
@@ -51,7 +51,6 @@ public class Board {
 
 
     public ArrayList<PlayerMove> getLegalJumpsFrom(PlayerColor playerTurn, PieceData pieceRef) {
-        //    private boolean canJump(PlayerColor playerTurn, PieceData piece, Position p1, Position p2) {
         ArrayList<PlayerMove> moves = new ArrayList<PlayerMove>();  // The legal jumps will be stored in this list.
         Position piecePos = pieceRef.pos;
 //added so that piecedata doesnt change in later functions
@@ -63,8 +62,6 @@ public class Board {
             moves.addAll(getKingJumps(playerTurn, piece, piecePos,getDirectionFromNeighbours(piecePos, piecePos.getTopLeft())));
             moves.addAll(getKingJumps(playerTurn, piece, piecePos,getDirectionFromNeighbours(piecePos, piecePos.getBottomLeft())));
             moves.addAll(getKingJumps(playerTurn, piece, piecePos,getDirectionFromNeighbours(piecePos, piecePos.getBottomRight())));
-
-
         }
         else {
             if (canJump(playerTurn, piece, piecePos.getTopRight(), piecePos.getTopRight(2)))
@@ -101,20 +98,13 @@ boolean ableToMove=false;
             }
             ableToMove=canJump(playerTurn, piece, checkPosition,check2Position);
             if (ableToMove&&isEmptyLine) {
-                Position canMovePos=Position.subtract(checkPosition,direction);
                 kingJumps.add(new PlayerMove(piece,checkPosition,check2Position,true));
             }
-
         }
-
-
         return kingJumps;
     }
 
 
-    public boolean checkIfEmptyTile(Position dir, Position piecePosition) {
-        return tiles[piecePosition.getX()][piecePosition.getY()].hasPiece();
-    }
 
     private boolean canJump(PlayerColor playerTurn, PieceData piece, Position p1, Position p2) {
 
@@ -145,17 +135,17 @@ boolean ableToMove=false;
 
     }
 
-    private boolean canMove(PlayerColor playerTurn, PieceData piece, Position pos2) {
+    private boolean canMove(PlayerColor playerTurn, PieceData piece, Position positionToMove) {
 
-        if (pos2.getX() < 0 || pos2.getX() >= 8 || pos2.getY() < 0 || pos2.getY() >= 8)
-            return false;  // pos2 is off the board
+        if (positionToMove.getX() < 0 || positionToMove.getX() >= 8 || positionToMove.getY() < 0 || positionToMove.getY() >= 8)
+            return false;  // positionToMove is off the board
 
-        Tile tileAtPos = tiles[pos2.getX()][pos2.getY()];
-        if (tileAtPos.hasPiece() == true) return false;  // pos2 already contains a piece.
+        Tile tileAtPos = tiles[positionToMove.getX()][positionToMove.getY()];
+        if (tileAtPos.hasPiece() == true) return false;  // positionToMove already contains a piece.
 
         if (playerTurn.equals(PlayerColor.white)) {
             if (piece.getPieceColor().equals(PlayerColor.white)) {
-                if (!piece.getIsKing() && (pos2.getY() < piece.pos.getY())) {
+                if (!piece.getIsKing() && (positionToMove.getY() < piece.pos.getY())) {
                     return false;
                 }
                 if (piece.getIsKing()) return true;
@@ -165,7 +155,7 @@ boolean ableToMove=false;
             }
         }else {
             if (piece.getPieceColor().equals(PlayerColor.black)) {
-                if (((!piece.getIsKing() && pos2.getY() > piece.pos.getY())))
+                if (((!piece.getIsKing() && positionToMove.getY() > piece.pos.getY())))
                     return false;  // Regular black piece can only move up.
                 if (piece.getIsKing()) return true;
                 return true;  // The move is legal.
@@ -193,18 +183,11 @@ boolean ableToMove=false;
 
             }
             else {
-
-
                 if (canMove(playerTurn, piece, piecePos.getTopRight())) {
                     moves.add(new PlayerMove(piece, piecePos.getTopRight()));
                 }
-
                 if (canMove(playerTurn, piece, piecePos.getTopLeft())) {
-
-                    if (piece.getIsKing())
-                        moves.addAll(getKingMoves(playerTurn, piece, piecePos, piecePos.getTopLeft()));
-                    else
-                        moves.add(new PlayerMove(piece, piecePos.getTopLeft()));
+                    moves.add(new PlayerMove(piece, piecePos.getTopLeft()));
                 }
                 if (canMove(playerTurn, piece, piecePos.getBottomRight()))
                     moves.add(new PlayerMove(piece, piecePos.getBottomRight()));

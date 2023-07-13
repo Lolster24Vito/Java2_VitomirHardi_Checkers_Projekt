@@ -21,9 +21,7 @@ public class TurnManager {
 
     public synchronized void addMove(PlayerMove move){
         moves.add(move);
-        //executorService.execute(new WriteXmlThread(moves));
         executorService.execute(new WriteXmlMoveThread(move));
-
     }
     public TurnManager(){
         executorService = Executors.newCachedThreadPool();

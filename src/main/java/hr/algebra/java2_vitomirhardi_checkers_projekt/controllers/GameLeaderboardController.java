@@ -24,7 +24,7 @@ public class GameLeaderboardController implements Initializable {
 private TableView<LeaderboardResult> tableLeaderboard;
 
 @FXML
-    private BorderPane root;
+private BorderPane root;
 
 @FXML
 private TableView table;

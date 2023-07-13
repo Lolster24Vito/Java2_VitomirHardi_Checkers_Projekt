@@ -34,16 +34,20 @@ public class XmlParser
     private static XMLEventReader nextReader;
 
 
-    private  static Document createDocument(String elementName) throws ParserConfigurationException {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    DOMImplementation domImplementation=builder.getDOMImplementation();
-    DocumentType documentType=domImplementation.createDocumentType("DOCTYPE",null,"moves.dtd");
-    return domImplementation.createDocument(null, elementName, documentType);
-}
+
 
     private static Document movesDocument;
     private  static  int MoveSaveCounter=0;
+    private static int currentReadMoveCounter =0;
+
+    private  static Document createDocument(String elementName) throws ParserConfigurationException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        DOMImplementation domImplementation=builder.getDOMImplementation();
+        DocumentType documentType=domImplementation.createDocumentType("DOCTYPE",null,"moves.dtd");
+        return domImplementation.createDocument(null, elementName, documentType);
+    }
+
     public static void writePlayerMove(PlayerMove playerMove) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         File xmlFile = new File(getFilePath(XmlConfiguration.FILENAME));
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -57,17 +61,69 @@ public class XmlParser
 
 
     }
-    public  static  void writePlayerMoves(List<PlayerMove> playerMoves) throws TransformerException, ParserConfigurationException {
-        Document document=createDocument("moves");
-        int counter=0;
-        for (PlayerMove playerMove:playerMoves
-             ) {
-            saveMoveToDocument(document, counter, playerMove);
-            counter++;
+
+    public static Optional<PlayerMove> readPlayerMove(int moveCounter) throws XMLStreamException, FileNotFoundException {
+        XMLInputFactory factory = XMLInputFactory.newFactory();
+        if(moveCounter!= currentReadMoveCounter ||nextReader==null)
+            nextReader = createEventReadXML(factory);
+        MoveXmlElementTypes currentType=MoveXmlElementTypes.none;
+        PlayerMoveXmlData playerMoveXmlData=new PlayerMoveXmlData();
+        boolean isThisElement=false;
+        while (nextReader.hasNext()) {
+            XMLEvent event = nextReader.nextEvent();
+            switch (event.getEventType()) {
+                case XMLStreamConstants.START_ELEMENT: {
+                    StartElement startElement = event.asStartElement();
+                    String qName = startElement.getName().getLocalPart();
+                    Iterator attributes = startElement.getAttributes();
+                    if (attributes.hasNext()) {
+                        while (attributes.hasNext()) {
+
+                            Attribute attribute= (Attribute) attributes.next();
+                            Optional<String> id=getAttributeId(attribute);
+                            if(id.isPresent()&&id.get().equals(String.valueOf(moveCounter))){
+                                //continue as normal
+                                isThisElement=true;
+                                playerMoveXmlData.setId(id.get());
+                                currentReadMoveCounter =Integer.parseInt(id.get())+1;
+                            }
+
+
+                        }
+                    }
+                    try {
+                        currentType=MoveXmlElementTypes.valueOf(qName);
+                    }
+                    catch (Exception e){
+                        continue;
+                    }
+                    break;
+                }
+                case XMLStreamConstants.CHARACTERS:
+                    String data = event.asCharacters().getData();
+                    if(isThisElement) {
+                        handleReadCharacters(currentType, playerMoveXmlData, data);
+                    }
+                    break;
+                case XMLStreamConstants.END_ELEMENT:
+                    EndElement endElement = event.asEndElement();
+                    if(endElement.getName().getLocalPart()=="PlayerMove") {
+                        if(isThisElement) {
+                            PlayerMove playerMove = playerMoveXmlData.toPlayerMove();
+                            return Optional.of(playerMove);
+                        }
+                    }
+
+                    currentType=MoveXmlElementTypes.none;
+                    break;
+                case XMLStreamConstants.END_DOCUMENT:
+                    break;
+            }
+
         }
 
 
-            saveDocument(document,XmlConfiguration.FILENAME);
+        return Optional.empty();
 
     }
 
@@ -127,10 +183,6 @@ public class XmlParser
         return HelloApplication.class.getResource("").getPath() + fileName;
     }
 
-
-
-
-
     private static Attr createAttribute(Document document, String name, String value) {
 
     Attr attr=document.createAttribute(name);
@@ -143,10 +195,97 @@ public class XmlParser
         element.appendChild(text);
         return element;
     }
+public static void getPlayerCountMoves() throws XMLStreamException, FileNotFoundException {
+        int blackCounter=0;
+        int whiteCounter=0;
+    XMLInputFactory factory = XMLInputFactory.newFactory();
 
+    XMLEventReader reader = createEventReadXML(factory);
+    StringBuilder report = new StringBuilder();
+    List<PlayerMove> playerMoves=new ArrayList<>();
+    MoveXmlElementTypes currentType=MoveXmlElementTypes.none;
+    PlayerMoveXmlData playerMoveXmlData=new PlayerMoveXmlData();
+
+    while (reader.hasNext()) {
+        XMLEvent event = reader.nextEvent();
+        switch (event.getEventType()) {
+            case XMLStreamConstants.START_ELEMENT: {
+                // if brackets used -> variables have restricted scope -> Vuk Vojta
+                StartElement startElement = event.asStartElement();
+                String qName = startElement.getName().getLocalPart();
+
+
+                //switch qName
+                report.append(qName).append(" ");
+                Iterator attributes = startElement.getAttributes();
+                if (attributes.hasNext()) {
+                    report.append("Attributes: ");
+                    while (attributes.hasNext()) {
+                        Attribute attribute= (Attribute) attributes.next();
+                        Optional<String> id=getAttributeId(attribute);
+                        if(id.isPresent()){
+                            playerMoveXmlData.setId(id.get());
+                        }
+
+                    }
+                }
+                try {
+                    currentType=MoveXmlElementTypes.valueOf(qName);
+                }
+                catch (Exception e){
+                    continue;
+                }
+                break;
+            }
+            case XMLStreamConstants.CHARACTERS:
+                String data = event.asCharacters().getData();
+
+                handleReadCharacters(currentType,playerMoveXmlData,data);
+
+
+                if (!data.trim().isEmpty()) {
+                    report.append(data);
+                }
+                break;
+            case XMLStreamConstants.END_ELEMENT:
+                EndElement endElement = event.asEndElement();
+                if(endElement.getName().getLocalPart()=="PlayerMove") {
+                    PlayerMove playerMove;
+                    if (playerMoveXmlData.isJump()) {
+                        playerMove = new PlayerMove(
+                                new PieceData(new Position(playerMoveXmlData.getxPos(), playerMoveXmlData.getyPos()), playerMoveXmlData.isKing(), playerMoveXmlData.getPlayerColor()),
+                                new Position(playerMoveXmlData.getTakenPieceX(), playerMoveXmlData.getTakenPieceY()),
+                                new Position(playerMoveXmlData.getFromPosX(), playerMoveXmlData.getFromPosY()),
+                                playerMoveXmlData.isJump()
+                        );
+                    }
+                    else{
+                        playerMove=new PlayerMove(
+                                new PieceData(new Position(playerMoveXmlData.getxPos(), playerMoveXmlData.getyPos()), playerMoveXmlData.isKing(), playerMoveXmlData.getPlayerColor()),
+                                new Position(playerMoveXmlData.getFromPosX(), playerMoveXmlData.getyPos())
+
+                        );
+                    }
+                    if(playerMoveXmlData.getPlayerColor().equals(PlayerColor.black))
+                    blackCounter++;
+                    if(playerMoveXmlData.getPlayerColor().equals(PlayerColor.white))
+                        whiteCounter++;
+                }
+
+                currentType=MoveXmlElementTypes.none;
+                break;
+            case XMLStreamConstants.END_DOCUMENT:
+                report.append("Document ended");
+                break;
+        }
+
+    }
+    System.out.println("whitemoves:"+whiteCounter);
+    System.out.println("blackMoves:"+whiteCounter);
+
+}
     public static List<PlayerMove> readPlayerMoves() throws FileNotFoundException, XMLStreamException {
        XMLInputFactory factory = XMLInputFactory.newFactory();
-
        XMLEventReader reader = createEventReadXML(factory);
        StringBuilder report = new StringBuilder();
         List<PlayerMove> playerMoves=new ArrayList<>();
@@ -156,9 +295,6 @@ public class XmlParser
        while (reader.hasNext()) {
            XMLEvent event = reader.nextEvent();
            switch (event.getEventType()) {
-               case XMLStreamConstants.START_DOCUMENT:
-                   //report.append("Document started\n\n");
-                   break;
                case XMLStreamConstants.START_ELEMENT: {
                    // if brackets used -> variables have restricted scope -> Vuk Vojta
                    StartElement startElement = event.asStartElement();
@@ -239,9 +375,7 @@ public class XmlParser
         return id;
     }
     return Optional.empty();
-     /*   if(attribute.getName().toString().equals("id")){
 
-        }*/
     }
 
 
@@ -278,78 +412,6 @@ public class XmlParser
     private static XMLEventReader createEventReadXML(XMLInputFactory factory) throws XMLStreamException, FileNotFoundException {
         return factory.createXMLEventReader(new FileInputStream(XmlConfiguration.XML_FILE), String.valueOf(StandardCharsets.UTF_8));
     }
-    private static int currentMoveCounter=0;
-
-    public static Optional<PlayerMove> readPlayerMove(int moveCounter) throws XMLStreamException, FileNotFoundException {
-        XMLInputFactory factory = XMLInputFactory.newFactory();
-        if(moveCounter!=currentMoveCounter||nextReader==null)
-            nextReader = createEventReadXML(factory);
-        MoveXmlElementTypes currentType=MoveXmlElementTypes.none;
-        PlayerMoveXmlData playerMoveXmlData=new PlayerMoveXmlData();
-        boolean isThisElement=false;
-        while (nextReader.hasNext()) {
-            XMLEvent event = nextReader.nextEvent();
-            switch (event.getEventType()) {
-                case XMLStreamConstants.START_ELEMENT: {
-                    // if brackets used -> variables have restricted scope -> Vuk Vojta
-                    StartElement startElement = event.asStartElement();
-                    String qName = startElement.getName().getLocalPart();
-                    //switch qName
-                    Iterator attributes = startElement.getAttributes();
-                    if (attributes.hasNext()) {
-                        while (attributes.hasNext()) {
-
-                            Attribute attribute= (Attribute) attributes.next();
-                            Optional<String> id=getAttributeId(attribute);
-                            if(id.isPresent()&&id.get().equals(String.valueOf(moveCounter))){
-                                //continue as normal
-                                isThisElement=true;
-                                playerMoveXmlData.setId(id.get());
-                                currentMoveCounter=Integer.parseInt(id.get())+1;
-
-                            }
 
 
-                        }
-                    }
-                    try {
-                        currentType=MoveXmlElementTypes.valueOf(qName);
-                    }
-                    catch (Exception e){
-                        continue;
-                    }
-                    break;
-                }
-                case XMLStreamConstants.CHARACTERS:
-                    String data = event.asCharacters().getData();
-                    // it collects also String.empty
-                    //get string
-                    // handleReadCharacters(currentType,playerMoveXmlData,data);
-                    if(isThisElement) {
-                        handleReadCharacters(currentType, playerMoveXmlData, data);
-                    }
-                    break;
-                case XMLStreamConstants.END_ELEMENT:
-                    EndElement endElement = event.asEndElement();
-                    if(endElement.getName().getLocalPart()=="PlayerMove") {
-                        if(isThisElement) {
-                            PlayerMove playerMove = playerMoveXmlData.toPlayerMove();
-
-
-                            return Optional.of(playerMove);
-                        }
-                    }
-
-                    currentType=MoveXmlElementTypes.none;
-                    break;
-                case XMLStreamConstants.END_DOCUMENT:
-                    break;
-            }
-
-        }
-
-
-        return Optional.empty();
-
-    }
 }

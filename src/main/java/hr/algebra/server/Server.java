@@ -31,16 +31,12 @@ public class Server {
 
 
     public static void main(String[] args) {
-    //todo make collection of players
-    //todo make a dictionary of rooms with codes
         ExecutorService executorService =Executors.newFixedThreadPool(3);
         executorService.submit(Server::acceptMakeRoomRequests);
         executorService.submit(Server::acceptRoomJoinRequests);
         executorService.submit(Server::acceptMovesRequests);
 
         RmiServer.Init();
-        //acceptMakeRoomRequests();
-        //acceptRoomJoinRequests();
     }
 
     private static void acceptMovesRequests() {
@@ -70,14 +66,11 @@ public class Server {
                 ClientJoinRoomHandler clientJoinRoomHandler=new ClientJoinRoomHandler(clientSocket);
                 System.err.println("Client connected from port: " + clientSocket.getPort()+"----"+clientSocket.getInetAddress());
 
-              /*  Runnable ClientJoinRoomHandler= () -> {
-                    extracted(clientSocket);
-                };*/
                 executorService.execute(clientJoinRoomHandler);
 
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 

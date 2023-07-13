@@ -21,26 +21,12 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         this.mainStage = stage;
-//        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("CheckersBoard.fxml"));
-//      FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("LocalGameStartScreen.fxml"));
-       //FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("OnlineGameStartScreen.fxml"));
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("MainStartScreen.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
 
 
         stage.setScene(scene);
         stage.show();
-
-       // XmlParser.testSaveDocument();
-        try {
-         //   Optional<PlayerMove> playerMove = XmlParser.readNextPlayerMove();
-         //   Optional<PlayerMove> playerMove2 = XmlParser.readNextPlayerMove();
-            System.out.println("Blaa");
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-
 
     }
     public static Stage getMainStage() {

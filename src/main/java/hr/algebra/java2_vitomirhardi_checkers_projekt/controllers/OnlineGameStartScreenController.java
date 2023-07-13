@@ -155,8 +155,6 @@ public class OnlineGameStartScreenController implements Initializable {
         LoginMessage loginMessage=getLoginMessage();
         executorService=Executors.newSingleThreadExecutor();
 
-
-
         Runnable checkForRoomChange=new Runnable() {
             @Override
             public void run() {
@@ -232,9 +230,7 @@ public class OnlineGameStartScreenController implements Initializable {
 
         fxmlLoader.setControllerFactory(c ->{return  new GameBoardController(matchmakingRoomInfo,getLoginMessage());} );
         Scene scene = new Scene(fxmlLoader.load(), 1200, 768);
-        //encapsulate to new class
         boardController=fxmlLoader.getController();
-     //   boardController.setOnlineMatch(matchmakingRoomInfo);
         HelloApplication.getMainStage().setTitle("Checkers");
         HelloApplication.getMainStage().setScene(scene);
         HelloApplication.getMainStage().show();

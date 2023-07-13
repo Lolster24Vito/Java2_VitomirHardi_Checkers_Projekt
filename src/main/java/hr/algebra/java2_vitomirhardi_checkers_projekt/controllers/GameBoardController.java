@@ -13,7 +13,6 @@ import hr.algebra.java2_vitomirhardi_checkers_projekt.TurnManager;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.dal.RepositoryFactory;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.models.*;
 import hr.algebra.java2_vitomirhardi_checkers_projekt.rmiServer.ChatService;
-import hr.algebra.java2_vitomirhardi_checkers_projekt.xml.XmlConfiguration;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -89,10 +88,9 @@ private PlayerInfo thisOnlinePlayer;
     private final Color BLACK_COLOR = Color.rgb(30, 0, 0);
 
     private final Color WHITE_PIECE_COLOR = Color.rgb(244, 245, 202);
-    private final Color WHITE_PIECE_SELECTED_COLOR = Color.GREENYELLOW;
 
     private final Color BLACK_PIECE_COLOR = Color.rgb(71, 71, 64);
-    private final Color BLACK_PIECE_SELECTED_COLOR = Color.rgb(110, 0, 0);
+    private final Color JUMP_TILE_COLOR = Color.rgb(110, 0, 0);
 
     private final Color AVAILABLE_MOVE_COLOR = Color.GREEN;
     private final Color AVAILABLE_MOVE_EAT = Color.RED;
@@ -127,8 +125,6 @@ private PlayerInfo thisOnlinePlayer;
         @Override
         public void run() {
             if (colorTurn.equals(PlayerColor.white)) {
-
-
                 whiteTimerSeconds++;
                 Platform.runLater(() -> labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds)));
             }
@@ -139,7 +135,6 @@ private PlayerInfo thisOnlinePlayer;
         @Override
         public void run() {
             if (colorTurn.equals(PlayerColor.black)) {
-
                 blackTimerSeconds++;
                 Platform.runLater(() -> labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds)));
             }
@@ -158,25 +153,12 @@ private PlayerInfo thisOnlinePlayer;
         this.whitePlayer=whitePlayer;
         this.blackPlayer=blackPlayer;
     }
-
-    public void sendMessage(){
-        try {
-            stub.sendMessage(thisOnlinePlayer.getPlayerName(),tfMessage.getText());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-
-
-
-    }
-    //Online constructor
+    //online constructor
     public GameBoardController(MatchmakingRoomInfo matchmakingRoomInfo, LoginMessage currentPlayer)  {
 
         Optional<PlayerInfo> whitePlayer = matchmakingRoomInfo.getWhitePlayer();
         Optional<PlayerInfo> blackPlayer= matchmakingRoomInfo.getBlackPlayer();
         Optional<PlayerInfo> thisOnlinePlayer= matchmakingRoomInfo.getPlayerByName(currentPlayer.getUsername());
-        //if(whitePlayer.isEmpty()||blackPlayer.isEmpty()||matchmakingRoom.getPlayerByName(currentPlayer.getUsername());)//todo reload to onlineMatchmaking
 
         this.whitePlayer=whitePlayer.get();
         this.blackPlayer=blackPlayer.get();
@@ -200,6 +182,20 @@ private PlayerInfo thisOnlinePlayer;
         isOnline=true;
 
     }
+
+    public void sendMessage(){
+        try {
+            stub.sendMessage(thisOnlinePlayer.getPlayerName(),tfMessage.getText());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+
+
+    }
+    //Online constructor
+
 //todo add replay constructor
 
     private void updateChatMessages() {
@@ -255,8 +251,13 @@ private PlayerInfo thisOnlinePlayer;
         blackTimer.scheduleAtFixedRate(blackTimerTask, 0, 1000);
         chatMessages= FXCollections.observableArrayList();
         lvMessages.setItems(chatMessages);
-
-
+        if(onlineSerializedBoard!=null){
+            try {
+                loadFromSerializableBoard(onlineSerializedBoard);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
     Boolean debugBool=true;
     public void InitPane() {
@@ -285,7 +286,7 @@ private PlayerInfo thisOnlinePlayer;
                 //circle
                 if ((i <= 2) && count % 2 == 1) {
                         Piece piece = new Piece(PIECE_SIZE, WHITE_PIECE_COLOR, new Position(j, i), PlayerColor.white);
-                    if(isClickable(PlayerColor.white)){
+                    if(isPieceClickable(PlayerColor.white)){
                         piece.setOnMouseClicked(eventPieceClicked(piece));
                     }
                     //todo remove
@@ -301,7 +302,7 @@ private PlayerInfo thisOnlinePlayer;
                   //      debugBool=false;
 
                             Piece piece = new Piece(PIECE_SIZE, BLACK_PIECE_COLOR, new Position(j, i), PlayerColor.black);
-                        if(isClickable(PlayerColor.black)) {
+                        if(isPieceClickable(PlayerColor.black)) {
                             piece.setOnMouseClicked(eventPieceClicked(piece));
                         }
                             tile.setPiece(piece);
@@ -320,7 +321,7 @@ private PlayerInfo thisOnlinePlayer;
 
     }
 
-    private boolean isClickable(PlayerColor color) {
+    private boolean isPieceClickable(PlayerColor color) {
         return (!isOnline) || (isOnline && thisOnlinePlayer.getColor() == color);
     }
 
@@ -330,7 +331,7 @@ private PlayerInfo thisOnlinePlayer;
             for (PlayerMove possibleMove : allPlayerAvailablePositions) {
                 if (possibleMove.isJump()) {
                     Position piecePos = possibleMove.getPiecePosition();
-                    board.tiles[piecePos.getX()][piecePos.getY()].setFill(BLACK_PIECE_SELECTED_COLOR);
+                    board.tiles[piecePos.getX()][piecePos.getY()].setFill(JUMP_TILE_COLOR);
                 }
             }
         }
@@ -340,6 +341,18 @@ private PlayerInfo thisOnlinePlayer;
             @Override
             public void handle(MouseEvent t) {
                 tileClick(tile);
+            }
+        };
+    }
+    private EventHandler<MouseEvent> eventPieceClicked(Piece piece) {
+        return new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+
+                //selectTileToMove,showAvailableMoves
+                if (piece.getPieceColor().equals(colorTurn)) {
+                    clickOnPiece(piece.getPieceData());
+                }
             }
         };
     }
@@ -393,9 +406,6 @@ private PlayerInfo thisOnlinePlayer;
 
                 if (!anotherJump)
                     changePlayerTurn();
-            //&&!sentData
-
-
             }
         }
     }
@@ -487,16 +497,6 @@ e.printStackTrace();
         HelloApplication.getPopupStage().setTitle("GameWinScreen.fxml");
         HelloApplication.getPopupStage().setScene(scene);
         HelloApplication.getPopupStage().showAndWait();
-//showandwait()
-        // GameWinController gameWinController=loader.gerController();
-/*
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setContentText(colorTurn==PlayerColor.black?
-                String.format("white player %s is winner",GameStartController.getWhitePlayer().getPlayerName())
-                :String.format("black player %s is winner",GameStartController.getBlackPlayer().getPlayerName())
-        );
-a.show();*/
-
 
     }
 
@@ -513,7 +513,6 @@ a.show();*/
 
     private boolean checkIfValidMove(TileData tileData) {
         //if there's a jump in selected,it has to do it
-
         //if there is a jump in another piece it has to jump
         for (PlayerMove potentialMove : selectedAvailablePositions
         ) {
@@ -524,18 +523,7 @@ a.show();*/
 
     }
 
-    private EventHandler<MouseEvent> eventPieceClicked(Piece piece) {
-        return new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent t) {
 
-                //selectTileToMove,showAvailableMoves
-                if (piece.getPieceColor().equals(colorTurn)) {
-                    clickOnPiece(piece.getPieceData());
-                }
-            }
-        };
-    }
 
 
     private void clickOnPiece(PieceData piece) {
@@ -631,7 +619,7 @@ a.show();*/
 
         Piece movedPiece = new Piece(PIECE_SIZE, pieceColor, movePieceData, moveToPos);
 
-        if(isClickable(movedPiece.getPieceColor()))
+        if(isPieceClickable(movedPiece.getPieceColor()))
         movedPiece.setOnMouseClicked(eventPieceClicked(movedPiece));
 
         removePieceFromTile(fromPos.getX(), fromPos.getY());
@@ -639,9 +627,6 @@ a.show();*/
         addPieceToTile(moveToPos, movedPiece);
 
        board.tiles[moveToPos.getX()][moveToPos.getY()].setPiece(movedPiece);
-
-
-//add
     }
 
     private void refreshScore() {
@@ -746,34 +731,8 @@ public void setOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo){
 
 
 //remove everything from board
-            clearBoard();
             //load pieces
-            for (PieceData pieceD : serializableBoard.getSerializablePieces()) {
-                loadPieceToTile(pieceD);
-            }
-            //load match data
-            whiteTimerSeconds = serializableBoard.getWhiteTimerSeconds();
-            blackTimerSeconds = serializableBoard.getBlackTimerSeconds();
-            labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
-            labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds));
-
-            whitePlayer=new PlayerInfo( serializableBoard.getWhitePlayerName(),PlayerColor.white);
-            blackPlayer=new PlayerInfo(serializableBoard.getBlackPlayerName(),PlayerColor.black);
-
-
-            labelPlayerBlackName.setText(serializableBoard.getBlackPlayerName());
-            labelPlayerWhiteName.setText(serializableBoard.getWhitePlayerName());
-            colorTurn = serializableBoard.getPlayerTurn();
-            board.setEatenWhitePieces(serializableBoard.getEatenWhitePieces(), serializableBoard.getEatenWhiteKings());
-            board.setEatenBlackPieces(serializableBoard.getEatenBlackPieces(), serializableBoard.getEatenBlackKings());
-
-            allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
-            if (allPlayerAvailablePositions.isEmpty()) {
-                playerWin();
-            }
-            isJumpInTurn = allPlayerAvailablePositions.stream().anyMatch(p -> p.isJump());
-            highlightJumps();
-            refreshScore();
+            loadFromSerializableBoard(serializableBoard);
 
         } catch (Exception e) {
             Alert a = new Alert(Alert.AlertType.ERROR);
@@ -782,15 +741,38 @@ public void setOnlineMatch(MatchmakingRoomInfo matchmakingRoomInfo){
         }
 
     }
-//synchronize
-    /*while(datotekaZauteta){
-    wait()
+
+    private void loadFromSerializableBoard(SerializableBoard serializableBoard) throws IOException, ClassNotFoundException {
+        clearBoard();
+        for (PieceData pieceD : serializableBoard.getSerializablePieces()) {
+            loadPieceToTile(pieceD);
+        }
+        //load match data
+        whiteTimerSeconds = serializableBoard.getWhiteTimerSeconds();
+        blackTimerSeconds = serializableBoard.getBlackTimerSeconds();
+        labelPlayerWhiteTime.setText(TimerUtils.secondsToFormat(whiteTimerSeconds));
+        labelPlayerBlackTime.setText(TimerUtils.secondsToFormat(blackTimerSeconds));
+
+        whitePlayer=new PlayerInfo( serializableBoard.getWhitePlayerName(),PlayerColor.white);
+        blackPlayer=new PlayerInfo(serializableBoard.getBlackPlayerName(),PlayerColor.black);
+
+
+        labelPlayerBlackName.setText(serializableBoard.getBlackPlayerName());
+        labelPlayerWhiteName.setText(serializableBoard.getWhitePlayerName());
+        colorTurn = serializableBoard.getPlayerTurn();
+        board.setEatenWhitePieces(serializableBoard.getEatenWhitePieces(), serializableBoard.getEatenWhiteKings());
+        board.setEatenBlackPieces(serializableBoard.getEatenBlackPieces(), serializableBoard.getEatenBlackKings());
+
+        allPlayerAvailablePositions = board.getPlayerLegalMoves(colorTurn);
+        if (allPlayerAvailablePositions.isEmpty()) {
+            playerWin();
+        }
+        isJumpInTurn = allPlayerAvailablePositions.stream().anyMatch(p -> p.isJump());
+        highlightJumps();
+        refreshScore();
     }
-    datotekaZauteta=true
-    citaj pisi
-    datotekaZauzeta=false
-    notifyAll
-     */
+
+
     private void loadPieceToTile(PieceData pieceD) {
         Color pieceColor = pieceD.getPieceColor() == PlayerColor.white ? WHITE_PIECE_COLOR : BLACK_PIECE_COLOR;
         Piece piece = new Piece(PIECE_SIZE, pieceColor, pieceD);

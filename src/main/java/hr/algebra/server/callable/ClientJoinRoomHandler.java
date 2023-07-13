@@ -65,7 +65,12 @@ public class ClientJoinRoomHandler implements Runnable {
 
                 if (Server.matchRooms.containsKey(loginMessage.getRoomCode())) {
                     if (!Server.matchRooms.get(loginMessage.getRoomCode()).isPlayerInMatch(loginMessage.getUsername())) {
-                        Server.matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
+                        if(Server.matchRooms.get(loginMessage.getRoomCode()).getBlackPlayer().isPresent()){
+                            Server.matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.spectator));
+                        }
+                        else{
+                            Server.matchRooms.get(loginMessage.getRoomCode()).addPlayer(new PlayerInfo(loginMessage.getUsername(), PlayerColor.black));
+                        }
                     }
                     roomState = Server.matchRooms.get(loginMessage.getRoomCode()).getRoomState();
 

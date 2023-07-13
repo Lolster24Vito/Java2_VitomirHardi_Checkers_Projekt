@@ -31,7 +31,7 @@ public class WriteXmlMoveThread  implements Runnable {
             try {
                 XmlParser.writePlayerMove(playerMove);
             } catch (Exception e) {
-                Logger.getLogger(WriteXmlMovesThread.class.getName()).log(
+                Logger.getLogger(WriteXmlMoveThread.class.getName()).log(
                         Level.SEVERE, null, e);
             }
             //Write to document

@@ -45,7 +45,6 @@ public class ClientTurnHandler implements Runnable {
 
         oos.writeObject( matchmakingRooms.get(roomCode).getSerializableBoard());
 
-          // oos.writeObject(matchmakingRooms.get(roomCode).getMoves());
         } catch (Exception e) {
             e.printStackTrace();
             closeEverything();
@@ -72,8 +71,6 @@ public class ClientTurnHandler implements Runnable {
     public void run() {
         try {
     while (clientSocket.isConnected()){
-
-
          PlayerMoveSerializable playerMoveSerializable=(PlayerMoveSerializable) ois.readObject();
           serializableBoard=(SerializableBoard)ois.readObject();
 

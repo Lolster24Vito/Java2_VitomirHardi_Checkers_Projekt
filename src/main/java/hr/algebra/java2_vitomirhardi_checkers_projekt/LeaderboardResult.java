@@ -16,7 +16,6 @@ public class LeaderboardResult implements Serializable {
 
     private long score;
     private PlayerColor color;
-    //private string color
 public  LeaderboardResult(){}
 
 

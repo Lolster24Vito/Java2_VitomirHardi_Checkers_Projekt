@@ -17,6 +17,7 @@
          <children>
             <Button mnemonicParsing="false" onAction="#btnPreviousMoveAction" text="Previous move" />
             <Button mnemonicParsing="false" onAction="#btnNextMoveAction" text="Next move" />
+            <Button mnemonicParsing="false" onAction="#btnEventCountWhiteMoves" text="white moves" />
          </children>
       </FlowPane>
    </bottom>
